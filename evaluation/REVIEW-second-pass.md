@@ -17,8 +17,8 @@ writing (skill 0.1.1). Line references name the commit they were read at.
 
 | Claim | Result | Evidence |
 |---|---|---|
-| Tests at `da42828` | 59 passed (pytest 9.1.1, Python 3.11.5) | run in the working tree before it changed, and again in a `git archive da42828` copy |
-| Tests at `e07cf02` | 62 passed | working tree, clean |
+| Tests at `da42828` | 59 passed (pytest 9.1.1, Python 3.11.5); per file 23/10/24/2 | run in a `git archive da42828` copy (an earlier run in the working tree also passed 59, but its timing relative to the concurrent edits is not recorded) |
+| Tests at `e07cf02` | 62 passed; per file 23/10/27/2 (`pytest --collect-only`) | working tree, clean |
 | 0.1.0 ZIP byte-identical rebuild | yes, sha256 `62c1e54d2e738f08de5be48bed19626c7834619d706ad56aaee3ad9e78ea74c6`, 23,949 bytes, 8 entries | built twice from the tree and once from the archive; all equal to the `dist/` file present at the start |
 | 0.1.1 tested ZIP (first pass, `8fe396c`) | reproduced, `194a8ddd7188d5901e21d1af44f99231f4e0b37c4239524c69f15e0cc0eb95ab`; its MANIFEST equals `evaluation/e2e/MANIFEST-of-tested-package.txt` | built from `git archive 8fe396c` |
 | 0.1.1 final ZIP (`e07cf02`) | `b06149d07e200fb1c9f4c1be60250696a188d4cd8c35e261db6a894263aeecfb`, 24,981 bytes; differs from the tested ZIP only in `references/report-schema.md` line 11 | rebuilt to scratch, `cmp` equal to `dist/`; per-file `cmp` of both ZIPs |
@@ -64,11 +64,16 @@ Separated measurements over the 19 saved reports, computed from the saved
   unsupported diagnosis. This matches the first pass's split (1 unsupported,
   3 placement).
 - **Semantic support and regression-test usefulness** for the nine skill
-  reports: this pass read `skill-runs/02`, `08`, `10`, `04`, `06` and the
-  six pilot skill reports' finding/divergence sections; no unsupported
-  established claim was found. The proposed tests in 02, 08 and 10 are
-  concrete (preconditions, inputs, assertions) and targeted. These are this
-  session's labels, unreviewed.
+  reports: this pass read `skill-runs/02`, `08` and `10` in full; the
+  outcome, key events and divergence of `04`; the findings and divergence
+  of `06`; and, for the six pilot skill reports, every finding with its
+  references, every divergence statement, the hypothesis statements and
+  the regression-test status. No unsupported established claim was found:
+  both 03 `environment_provider` findings cite the `ok:false` results and
+  the `error` event; 05 and 07 file no finding. The proposed tests in 02,
+  08 and 10 are concrete (preconditions, inputs, assertions) and targeted;
+  the tests in 04, 06, 03 and the pilot reports were not read for
+  usefulness. These are this session's labels, unreviewed.
 
 What the repository cannot show, stated the same way as the first pass and
 confirmed here: the skill-condition iteration counts are self-reported

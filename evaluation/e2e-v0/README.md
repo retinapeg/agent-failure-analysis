@@ -31,8 +31,9 @@ and `input/bundle.json`.
 Host Claude Code 2.1.280, print mode, model `claude-fable-5-1` (recorded
 in the init event, every assistant event and the result usage), permission
 mode `default`, no MCP servers, tools `Bash, Edit, Glob, Read, Skill,
-Write`. The four user-level skills were not listed (user settings turn
-them off). The `advisor` tool was **not** in the tool list; the name
+Write`. The four user-level skills were not listed, which is consistent
+with the `skillOverrides: off` entries in the user settings (the mechanism
+was not tested). The `advisor` tool was **not** in the tool list; the name
 appears only in the session's slash-command list. Exact command and
 prompt: `protocol.md`. Per-session facts: `runs/*/session.txt`. Tool
 calls, helper results and the final message, with paths relativised and
