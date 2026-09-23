@@ -1,0 +1,8 @@
+2026-09-21T09:00:00Z [user] Deploy the docs site to staging.
+2026-09-21T09:00:02Z [agent] Building the site first.
+2026-09-21T09:00:03Z [tool_call] bash: mkdocs build
+2026-09-21T09:00:41Z [tool_result] ok: INFO - Documentation built in 37.9 seconds
+2026-09-21T09:00:42Z [tool_call] bash: rsync -av site/ staging:/var/www/docs/
+2026-09-21T09:00:44Z [tool_result] error: ssh: connect to host staging port 22: Connection reset by peer
+2026-09-21T09:00:45Z [agent] The upload failed with a connection reset. Retrying.
+2026-09-21T09:00:46Z [tool_call] bash: rsync -av site/ staging:/var/www/docs/

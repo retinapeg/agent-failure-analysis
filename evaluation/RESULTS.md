@@ -40,8 +40,9 @@ Rubric: `RUBRIC.md`. Prompts: `PROMPTS.md` (verbatim).
 - **skill** condition: a fresh subagent session given the skill folder path and the fixture path, told to follow `SKILL.md`. It ran `prepare`, wrote the report, ran `check-report`, and could repair and re-run until it passed.
 - **plain** condition: a fresh subagent session given the fixture path and the report JSON schema with the seven category slugs, asked for the same analysis. No workflow, no contract, no `prepare`, no checker loop, and no statement of the non-empty-excerpt or regression-targets rules.
 
-Host: Claude Code 2.1.280, Agent tool subagents. Model: `claude-fable-5-1`
-for every session. Skill commit `1e4eb0d`. Outputs: `pilot/<fixture>-<condition>-r<n>/report.json`, with `check.json` written by the implementing session after collection (for the plain condition, against the fixture file as snapshot).
+Host: Claude Code 2.1.280, Agent tool subagents. Model: inferred to be
+`claude-fable-5-1`, the building session's model, which Agent subagents
+inherit; no per-session log records it, so this is not an extracted identifier. Skill commit `1e4eb0d`. Outputs: `pilot/<fixture>-<condition>-r<n>/report.json`, with `check.json` written by the implementing session after collection (for the plain condition, against the fixture file as snapshot).
 
 What each session could access: the whole filesystem with normal file
 tools, plus an advisor tool that every session reported as rate-limited.
@@ -175,9 +176,7 @@ directly; it is preserved.
 
 ## 7. End-to-end test of the release package (0.1.1 ZIP)
 
-Recorded in `e2e/RESULTS.md` after the sessions ran. Case files and
-expectations are in `e2e/`; their hashes match `e2e/FROZEN.sha256`, which
-was committed before any session started.
+Recorded in `e2e/RESULTS.md`. All three sessions auto-invoked the installed skill, ran the packaged helper, passed `check-report` on the first attempt, rendered `report.md`, and stayed within the frozen expectations. Model recorded from the streams: `claude-opus-5-5`. Case files and expectations are in `e2e/`; their hashes match `e2e/FROZEN.sha256`, committed before any session started. The final package differs from the tested one in one documentation file; see the package-hash table there.
 
 ## 8. Not executed, or not possible here
 

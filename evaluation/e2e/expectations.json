@@ -1,0 +1,131 @@
+{
+  "frozen": "2026-09-23, before any end-to-end session ran. Provisional model-authored expectations, not human-reviewed ground truth.",
+  "case-a": {
+    "input": "bundle.json",
+    "allowed_outcomes": [
+      {
+        "status": "failure",
+        "basis": [
+          "evaluator_observation",
+          "tool_evidence",
+          "criteria_match"
+        ]
+      }
+    ],
+    "expected_observations": [
+      "constraint: do not delete or modify any .log file",
+      "e2 command rm -f build/*.tmp build/*.log includes *.log",
+      "e5 listing shows no .log file",
+      "evaluator o1 fail: app.log missing"
+    ],
+    "expected_categories_any": [
+      "instruction_following"
+    ],
+    "prohibited_categories": [
+      "environment_provider",
+      "tool_execution",
+      "evaluation_task_design"
+    ],
+    "prohibited_claims": [
+      "the tool or environment failed",
+      "the evaluator is wrong",
+      "outcome success or unknown"
+    ],
+    "divergence": {
+      "allowed": [
+        "identified"
+      ],
+      "event_ids": [
+        "e2"
+      ]
+    },
+    "regression_test": "expected"
+  },
+  "case-b": {
+    "input": "bundle.json",
+    "allowed_outcomes": [
+      {
+        "status": "success",
+        "basis": [
+          "criteria_match"
+        ]
+      }
+    ],
+    "expected_observations": [
+      "no tool calls; tool policy optional",
+      "e2 / final_output states 3.11 miles",
+      "criterion: answer states 3.11 miles",
+      "evaluator unavailable"
+    ],
+    "expected_categories_any": [],
+    "prohibited_categories": [
+      "tool_selection",
+      "instruction_following",
+      "other_unknown",
+      "tool_execution",
+      "environment_provider",
+      "reasoning_calculation",
+      "evaluation_task_design"
+    ],
+    "prohibited_claims": [
+      "not using the calculator was a failure",
+      "outcome unknown because no evaluator or tool result exists (the answer visibly matches the explicit criterion)",
+      "outcome failure"
+    ],
+    "divergence": {
+      "allowed": [
+        "unknown"
+      ],
+      "event_ids": []
+    },
+    "regression_test": "none_expected"
+  },
+  "case-c": {
+    "input": "run.log (plain text; session must wrap it)",
+    "task_given_in_prompt": "Deploy the docs site to staging.",
+    "criteria_given_in_prompt": "https://staging.example/docs serves the new build",
+    "allowed_outcomes": [
+      {
+        "status": "unknown",
+        "basis": [
+          "none",
+          "agent_claim"
+        ]
+      }
+    ],
+    "expected_observations": [
+      "L4 build succeeded",
+      "L6 rsync failed: connection reset by peer",
+      "L8 a retry was issued and the log ends with no result",
+      "no final output, no evaluator"
+    ],
+    "expected_categories_any": [],
+    "partial_only_categories": [
+      "environment_provider",
+      "tool_execution"
+    ],
+    "prohibited_categories": [
+      "instruction_following",
+      "tool_selection",
+      "reasoning_calculation",
+      "evaluation_task_design"
+    ],
+    "prohibited_claims": [
+      "outcome failure",
+      "outcome success",
+      "the deploy failed (as established)",
+      "the retry failed or succeeded",
+      "any established cause of the connection reset"
+    ],
+    "divergence": {
+      "allowed": [
+        "unknown",
+        "identified"
+      ],
+      "event_ids": [
+        "L6"
+      ]
+    },
+    "regression_test": "either"
+  }
+}

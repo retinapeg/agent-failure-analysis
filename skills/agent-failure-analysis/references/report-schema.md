@@ -8,7 +8,7 @@ References use the format in `evidence-contract.md` section 2.
 ```json
 {
   "report_version": "afa-report/1",
-  "skill_version": "0.1.0",
+  "skill_version": "<the version printed by trace_tools.py --version>",
   "run_id": "<must equal snapshot run_id>",
   "source": {"snapshot": "snapshot.json", "sha256": "<must equal snapshot hash>"},
   "task": {

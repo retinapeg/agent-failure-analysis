@@ -1,0 +1,79 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.1",
+  "run_id": "e2e-b-optional-tools-unused",
+  "source": {
+    "snapshot": "snapshot.json",
+    "sha256": "37b4a971ae3d1a268dfc77ba43a489cc4990b064e8caace79813162f653d82a8"
+  },
+  "task": {
+    "description_ref": {"pointer": "/task/description"},
+    "criteria_status": "known",
+    "tool_policy_status": "optional",
+    "evidence_coverage": {
+      "events_total": 2,
+      "events_reviewed": 2,
+      "note": "Both events, the task frame, final_output, evaluator status and provenance were read in full from snapshot.json. Signals considered: the only non-empty signal is no_tool_calls=true under tool_policy 'optional'; it is dismissed as not a failure (taxonomy 'Not failures': tool use absent when policy is optional) because the final answer meets the stated criterion. No failed tool results, error events, unpaired or repeated calls, completion-keyword hits, or instruction-like text were detected. Provenance marks the bundle as synthetic, so this report describes a hand-authored test case, not a real agent run."
+    }
+  },
+  "outcome": {
+    "status": "success",
+    "basis": "criteria_match",
+    "statement": "The single known success criterion requires the answer to state 3.11 miles, and the final output states exactly that. The value is also arithmetically correct: 5 km / 1.609344 km per mile = 3.10686 miles, which rounds to 3.11 at two decimal places. No evaluator was available, so this outcome is the analyst's criteria match, not an independent grading.",
+    "references": [
+      {"pointer": "/success_criteria/criteria/0", "excerpt": "The answer states 3.11 miles"},
+      {"pointer": "/final_output/text", "excerpt": "5 kilometres is 3.11 miles."},
+      {"event_id": "e2", "pointer": "/content/text", "excerpt": "3.11 miles"},
+      {"pointer": "/task/description", "excerpt": "give the result to two decimal places"}
+    ]
+  },
+  "key_events": [
+    {
+      "event_id": "e1",
+      "summary": "The user asks for 5 km converted to miles at two decimal places, matching the task description.",
+      "references": [
+        {"event_id": "e1", "pointer": "/content/text", "excerpt": "How many miles is 5 km? Two decimal places please."}
+      ]
+    },
+    {
+      "event_id": "e2",
+      "summary": "The assistant answers directly, and the trace records no tool call. The answer is 3.11 miles, which meets the criterion. Not calling a tool is allowed because the tool policy is optional.",
+      "references": [
+        {"event_id": "e2", "pointer": "/content/text", "excerpt": "5 kilometres is 3.11 miles."},
+        {"pointer": "/tool_policy/status", "excerpt": "optional"},
+        {"pointer": "/tool_policy/note", "excerpt": "Using it is not required."}
+      ]
+    }
+  ],
+  "findings": [],
+  "earliest_divergence": {
+    "status": "unknown",
+    "statement": "The run shows no departure from expected progress. Its one assistant turn gives the correct, criterion-satisfying answer. 'unknown' here means no divergence was observed; it does not mean one is suspected.",
+    "references": [
+      {"event_id": "e2", "pointer": "/content/text", "excerpt": "5 kilometres is 3.11 miles."}
+    ]
+  },
+  "hypotheses": [],
+  "missing_information": [
+    {
+      "item": "Evaluator observations (the evaluator is unavailable).",
+      "discriminates": "No open hypotheses depend on it. It would only corroborate or dispute the criteria-match outcome independently."
+    },
+    {
+      "item": "Any real agent, model, or provider behind the events (provenance says the bundle is synthetic).",
+      "discriminates": "No open hypotheses depend on it. It limits what the report can generalise: this is a hand-authored test case, not evidence about any deployed agent's behaviour."
+    }
+  ],
+  "remediation": {
+    "status": "none",
+    "statement": "No failure was found, so there is nothing to remediate. Answering without the optional calculator is consistent with the tool policy."
+  },
+  "regression_test": {
+    "status": "none",
+    "targets": [],
+    "preconditions": [],
+    "inputs": [],
+    "expected_behavior": [],
+    "assertions": []
+  }
+}
