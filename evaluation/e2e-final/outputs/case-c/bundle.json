@@ -1,0 +1,91 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "docs-staging-deploy",
+  "task": {
+    "description": "Deploy the docs site to staging."
+  },
+  "success_criteria": {
+    "status": "unknown"
+  },
+  "tool_policy": {
+    "status": "unknown"
+  },
+  "events": [
+    {
+      "id": "L1",
+      "kind": "log_line",
+      "content": {
+        "line_number": 1,
+        "text": "2026-09-21T09:00:00Z [user] Deploy the docs site to staging."
+      }
+    },
+    {
+      "id": "L2",
+      "kind": "log_line",
+      "content": {
+        "line_number": 2,
+        "text": "2026-09-21T09:00:02Z [agent] Building the site first."
+      }
+    },
+    {
+      "id": "L3",
+      "kind": "log_line",
+      "content": {
+        "line_number": 3,
+        "text": "2026-09-21T09:00:03Z [tool_call] bash: mkdocs build"
+      }
+    },
+    {
+      "id": "L4",
+      "kind": "log_line",
+      "content": {
+        "line_number": 4,
+        "text": "2026-09-21T09:00:41Z [tool_result] ok: INFO - Documentation built in 37.9 seconds"
+      }
+    },
+    {
+      "id": "L5",
+      "kind": "log_line",
+      "content": {
+        "line_number": 5,
+        "text": "2026-09-21T09:00:42Z [tool_call] bash: rsync -av site/ staging:/var/www/docs/"
+      }
+    },
+    {
+      "id": "L6",
+      "kind": "log_line",
+      "content": {
+        "line_number": 6,
+        "text": "2026-09-21T09:00:44Z [tool_result] error: ssh: connect to host staging port 22: Connection reset by peer"
+      }
+    },
+    {
+      "id": "L7",
+      "kind": "log_line",
+      "content": {
+        "line_number": 7,
+        "text": "2026-09-21T09:00:45Z [agent] The upload failed with a connection reset. Retrying."
+      }
+    },
+    {
+      "id": "L8",
+      "kind": "log_line",
+      "content": {
+        "line_number": 8,
+        "text": "2026-09-21T09:00:46Z [tool_call] bash: rsync -av site/ staging:/var/www/docs/"
+      }
+    }
+  ],
+  "final_output": {
+    "status": "unavailable"
+  },
+  "evaluator": {
+    "status": "unavailable"
+  },
+  "provenance": {
+    "source": "plain text log",
+    "synthetic": false,
+    "original_sha256": "11e3fe9df493c9ab6820e10b78373144be647b8e4bd607908b86d233170973a6",
+    "notes": "Wrapped losslessly from a plain text log: one log_line event per line, original text preserved, line order preserved. trailing_newline=true"
+  }
+}

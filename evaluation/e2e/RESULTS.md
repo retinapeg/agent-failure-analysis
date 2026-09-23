@@ -63,4 +63,5 @@ session's, written before the runs but not reviewed by anyone else.
 | Package | Commit | sha256 | Covered by |
 |---|---|---|---|
 | 0.1.1 as tested here (not kept on disk; `dist/` is ignored. The build is byte-stable, so checking out `8fe396c` and running `python3 scripts/build_release.py` reproduces this hash) | `8fe396c` | `194a8ddd7188d5901e21d1af44f99231f4e0b37c4239524c69f15e0cc0eb95ab` | the three sessions above |
-| 0.1.1 final (after the `report-schema.md` example fix) | review commit | `b06149d07e200fb1c9f4c1be60250696a188d4cd8c35e261db6a894263aeecfb` | **no end-to-end run**; differs from the tested package only in `references/report-schema.md` (one example value), per the manifest diff recorded in the commit message |
+| 0.1.1 after the `report-schema.md` example fix (superseded, never the release package) | `89f80da` | `b06149d07e200fb1c9f4c1be60250696a188d4cd8c35e261db6a894263aeecfb` | no end-to-end run; differs from the tested package only in `references/report-schema.md` (one example value). Superseded by the final package below. |
+| 0.1.1 **final release package** | `77af62c` | `0b93e7c01de2ebdbfb2a96001fb2b01b8e5100d7f902d6ff392552b51d8c4a9a` | the three sessions in `evaluation/e2e-final/`, all passing |

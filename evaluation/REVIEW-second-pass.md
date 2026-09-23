@@ -1,3 +1,5 @@
+> Historical note added 2026-09-23 after the final release check: statements below that the 0.1.1 package in `dist/` (`b06149…`) is final or has no end-to-end run are superseded. The final package is `0b93e7c0…`, built at `77af62c`, and was run end to end on the three frozen cases; see `evaluation/e2e-final/RESULTS.md`. The rest of this file is unchanged.
+
 # Release-validation review, second pass (2026-09-23)
 
 Written by a second Claude Code session (`claude-fable-5-1`, Claude Code

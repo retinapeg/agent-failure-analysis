@@ -128,7 +128,7 @@ max turns"; the second with `--max-turns 4` answered.
 
 | Host | Status | Basis |
 |---|---|---|
-| Claude Code 2.1.280, macOS | **tested** | section 7: end-to-end from the 0.1.1 ZIP in an isolated project |
+| Claude Code 2.1.280, macOS | **tested** | sections 7 and 7a: end-to-end from the 0.1.1 ZIP in isolated projects, including the exact final package |
 | Codex | format-compatible, **untested** | `.agents/skills/` layout per learn.chatgpt.com/docs/build-skills on 2026-09-23; Codex is not installed on this machine |
 | claude.ai custom skills upload | **untested** | the ZIP has the documented one-folder layout; not uploaded |
 
@@ -189,6 +189,25 @@ cannot be verified independently of this statement.
 ## 7. End-to-end test of the release package (0.1.1 ZIP)
 
 Recorded in `e2e/RESULTS.md`. All three sessions auto-invoked the installed skill, ran the packaged helper, passed `check-report` on the first attempt, rendered `report.md`, and stayed within the frozen expectations. Model recorded from the streams: `claude-opus-5-5`. Case files and expectations are in `e2e/`; their hashes match `e2e/FROZEN.sha256`, committed before any session started. The final package differs from the tested one in one documentation file; see the package-hash table there.
+
+## 7a. Final end-to-end test of the exact release package
+
+Recorded in `e2e-final/RESULTS.md`. The three frozen cases were rerun, one
+fresh session each, against the exact final package (sha256 `0b93e7c0…`,
+built at `77af62c`). All three auto-invoked the installed skill, read the
+packaged references, ran the packaged helper, passed `check-report` on the
+first executed run, rendered `report.md`, and stayed within the frozen
+expectations. Model recorded from the streams: `claude-opus-5-5`.
+
+## 7b. Final freeze
+
+Branch `review/v0-release`; `main` remains at `da42828` and does not contain
+the release. No remote exists. Final commit is named in the handoff and in
+`git log`. Freeze checks on the final package, recorded in
+`e2e-final/RESULTS.md`: 62 tests passed; two rebuilds byte-identical to the
+dist ZIP and to the hash recorded at the start of every final session
+(`0b93e7c0…`); eight ZIP entries with no evaluation, test, cache, secret, or
+personal-identifier content.
 
 ## 8. Not executed, or not possible here
 

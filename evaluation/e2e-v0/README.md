@@ -1,3 +1,5 @@
+> Historical note added 2026-09-23 after the final release check: statements below that the 0.1.1 package in `dist/` (`b06149…`) is final or has no end-to-end run are superseded. The final package is `0b93e7c0…`, built at `77af62c`, and was run end to end on the three frozen cases; see `evaluation/e2e-final/RESULTS.md`. The rest of this file is unchanged.
+
 # Second end-to-end test: the 0.1.0 package as committed at `da42828`
 
 Run on 2026-09-23 by the second release-validation session (this pass ran

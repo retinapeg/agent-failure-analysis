@@ -1,0 +1,34 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.1",
+  "run_id": "e2e-b-optional-tools-unused",
+  "source": {"snapshot": "snapshot.json", "sha256": "37b4a971ae3d1a268dfc77ba43a489cc4990b064e8caace79813162f653d82a8"},
+  "task": {
+    "description_ref": {"pointer": "/task/description"},
+    "criteria_status": "known",
+    "tool_policy_status": "optional",
+    "evidence_coverage": {"events_total": 2, "events_reviewed": 2, "note": "Both events (e1 user_message, e2 assistant_message), the final output, criteria and tool policy were read in full. No signals fired except no_tool_calls, which is dismissed: tool policy is optional. Evaluator unavailable. Bundle is marked synthetic."}
+  },
+  "outcome": {
+    "status": "success",
+    "basis": "criteria_match",
+    "statement": "The single known criterion requires the answer to state 3.11 miles; the final output states 3.11 miles. Independently, 5 km x 0.621371 mi/km = 3.106855 mi, which rounds to 3.11 at two decimal places, so the answer is also arithmetically correct. This is the analyst's criteria match, not an evaluator verdict (none is available).",
+    "references": [
+      {"pointer": "/success_criteria/criteria/0", "excerpt": "The answer states 3.11 miles"},
+      {"pointer": "/final_output/text", "excerpt": "5 kilometres is 3.11 miles."}
+    ]
+  },
+  "key_events": [
+    {"event_id": "e1", "summary": "User asks for 5 km in miles to two decimal places.", "references": [{"event_id": "e1", "pointer": "/content/text", "excerpt": "How many miles is 5 km? Two decimal places please."}]},
+    {"event_id": "e2", "summary": "Agent answers directly without calling the optional calculator tool; answer is 3.11 miles.", "references": [{"event_id": "e2", "pointer": "/content/text", "excerpt": "3.11 miles"}, {"pointer": "/tool_policy/note", "excerpt": "Using it is not required."}]}
+  ],
+  "findings": [],
+  "earliest_divergence": {"status": "unknown", "statement": "No departure from expected progress was observed; the run answered correctly in one step.", "references": []},
+  "hypotheses": [],
+  "missing_information": [
+    {"item": "Evaluator observations (evaluator unavailable).", "discriminates": "Would corroborate the analyst's criteria-match success judgement; no hypothesis depends on it."},
+    {"item": "The run is synthetic (provenance.synthetic = true).", "discriminates": "Conclusions describe this hand-authored trace only, not the behaviour of any real agent."}
+  ],
+  "remediation": {"status": "none", "statement": "No failure was found, so no remediation is proposed. Not using the calculator is permitted by the optional tool policy."},
+  "regression_test": {"status": "none", "targets": [], "preconditions": [], "inputs": [], "expected_behavior": [], "assertions": []}
+}

@@ -12,8 +12,9 @@ interpretation. The Python helper does only deterministic checks: it never
 calls a model, never touches the network, and never opens anything it finds
 inside a trace.
 
-Status: **V0, proposed for Leo's review.** Not published, not installed
-globally. See `docs/decisions.md` for the decisions awaiting review.
+Status: **V0.1.1 release candidate, recorded as release-ready for Leo's
+review** (see `evaluation/e2e-final/RESULTS.md`). Not published, not
+installed globally. Approved and deferred decisions are in `docs/decisions.md`.
 
 ## Supported inputs
 
@@ -115,9 +116,9 @@ Recorded in `evaluation/RESULTS.md`. In short:
 - Deterministic tests: 62 pytest cases, all passing on this machine.
 - Skill behaviour, V0 build: 19 fresh Claude Code subagent sessions (`claude-fable-5-1`) across ten synthetic fixtures, running the skill from the source repository. All 19 skill-condition reports passed the checker and matched the retrospective answer keys on outcome, categories, and divergence. The keys were written afterwards by the same session that built the skill; they are development labels, not ground truth.
 - Exploratory pilot, 12 runs on three fixtures: a plain prompt given only the schema produced one established unsupported diagnosis, three truthful non-failures filed in the findings field, two invalid references, and one schema error across six runs; the skill condition produced none of those on the same six. This is not a reliability estimate and does not establish that the skill beats plain prompting.
-- Release package: the 0.1.1 ZIP was installed in three isolated throwaway projects and exercised end to end by fresh Claude Code sessions (`claude-opus-5-5`) on three new cases whose expectations were frozen by hash beforehand. All three auto-invoked the skill, ran the packaged helper, passed the checker first time, and stayed within the expectations. The final ZIP differs from the tested one in a single documentation example; see `evaluation/e2e/RESULTS.md`.
+- Release package: the exact final 0.1.1 ZIP was installed in three isolated throwaway projects and exercised end to end by fresh Claude Code sessions (`claude-opus-5-5`) on three cases whose expectations were frozen by hash beforehand. All three auto-invoked the skill, read the packaged references, ran the packaged helper, passed the checker on the first executed run, and stayed within the expectations. An earlier package build passed the same three cases. See `evaluation/e2e-final/RESULTS.md` and `evaluation/e2e/RESULTS.md`.
 - Every semantic label is the implementing session's and is marked **unreviewed** until Leo reads the reports.
-- A second, concurrent validation pass by a different session independently reproduced the builds and check records, ran the committed 0.1.0 ZIP end to end on three further cases (`claude-fable-5-1`, `evaluation/e2e-v0/`), and recorded its own findings and disagreements in `evaluation/REVIEW-second-pass.md`. The final 0.1.1 ZIP has no end-to-end run of its own from either pass.
+- A second, concurrent validation pass by a different session independently reproduced the builds and check records, ran the committed 0.1.0 ZIP end to end on three further cases (`claude-fable-5-1`, `evaluation/e2e-v0/`), and recorded its own findings and disagreements in `evaluation/REVIEW-second-pass.md`. The final 0.1.1 ZIP (sha256 `0b93e7c0…`) was later run end to end on the three frozen cases; see `evaluation/e2e-final/RESULTS.md`.
 
 ## Limitations
 

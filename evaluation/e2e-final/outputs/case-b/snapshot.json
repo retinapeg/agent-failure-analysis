@@ -1,0 +1,50 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "e2e-b-optional-tools-unused",
+  "task": {
+    "description": "Convert 5 kilometres to miles and give the result to two decimal places."
+  },
+  "success_criteria": {
+    "status": "known",
+    "criteria": [
+      "The answer states 3.11 miles"
+    ]
+  },
+  "tool_policy": {
+    "status": "optional",
+    "tools": [
+      "calculator"
+    ],
+    "note": "A calculator tool is available. Using it is not required."
+  },
+  "events": [
+    {
+      "id": "e1",
+      "kind": "user_message",
+      "ts": "2026-09-21T09:00:01Z",
+      "content": {
+        "text": "How many miles is 5 km? Two decimal places please."
+      }
+    },
+    {
+      "id": "e2",
+      "kind": "assistant_message",
+      "ts": "2026-09-21T09:00:02Z",
+      "content": {
+        "text": "5 kilometres is 3.11 miles."
+      }
+    }
+  ],
+  "final_output": {
+    "status": "available",
+    "text": "5 kilometres is 3.11 miles."
+  },
+  "evaluator": {
+    "status": "unavailable"
+  },
+  "provenance": {
+    "source": "synthetic case authored by hand for the V0 release-validation end-to-end test",
+    "synthetic": true,
+    "notes": "SYNTHETIC. No real agent, model, provider, or user produced these events."
+  }
+}
