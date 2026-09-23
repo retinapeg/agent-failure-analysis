@@ -24,7 +24,7 @@ Coverage by file:
 
 Design, frozen before any run: fixtures 03 (real failure), 05 (successful
 control), 07 (insufficient evidence); two conditions; two repeats each.
-Rubric: `RUBRIC.md`. Answer keys in `expected/` were written **after** all
+Rubric: `RUBRIC.md`. Prompts: `PROMPTS.md` (verbatim). Answer keys in `expected/` were written **after** all
 runs finished, so no session could read them.
 
 - **skill** condition: a fresh subagent session given only the skill folder and the fixture, told to follow `SKILL.md`.
@@ -48,9 +48,9 @@ for every session. Skill commit: `1e4eb0d`. Outputs: `pilot/<fixture>-<condition
 | 07-plain-r1 | ok | unknown / none | **other_unknown** (recording gap filed as a finding) | unknown | pass | **fail** | pass | partial |
 | 07-plain-r2 | **1 error** (environment_provider without a failed result or error) | unknown / none | **environment_provider** | unknown | pass | **fail** | pass | partial |
 
-Iteration counts for the skill condition are the sessions' own reports of how many `check-report` runs they needed. The four skill sessions that needed two runs all hit the same error, an empty `excerpt` on an empty tool output, and fixed it themselves. The plain condition had no checker loop; the errors shown are what the checker found afterwards.
+Iteration counts for the skill condition are the sessions' own reports of how many `check-report` runs they needed. The two skill sessions in this table that needed two runs (and one more in section 3) all hit the same error, an empty `excerpt` on an empty tool output, and fixed it themselves. The plain condition had no checker loop; the errors shown are what the checker found afterwards. Two of the three plain rejections (03-plain-r2, 05-plain-r1) are format rules the plain prompt was never told about (non-empty excerpts, targets on a proposed test), so they say little about analysis quality. The third (07-plain-r2, an `environment_provider` finding with no failed result or error to cite) is the fabrication guard doing its job.
 
-Reading, marked *unreviewed* (implementing session's labels): in this pilot the skill condition produced the key-consistent outcome, findings, and divergence in 6 of 6 runs; the plain condition got the outcome right in 6 of 6 but filed findings the key prohibits in 4 of 6 and produced reports the checker rejects in 3 of 6. This is twelve runs of one model on three synthetic fixtures. It shows the contract and checker change behaviour on these cases; it does not measure reliability and does not compare models.
+Reading, marked *unreviewed* (implementing session's labels): in this pilot the skill condition produced the key-consistent outcome, findings, and divergence in 6 of 6 runs; the plain condition got the outcome right in 6 of 6 but filed findings the key prohibits in 4 of 6 (the substantive comparison) and produced reports the checker rejects in 3 of 6 (mostly format rules it was not given; see above). This is twelve runs of one model on three synthetic fixtures. It shows the contract and checker change behaviour on these cases; it does not measure reliability and does not compare models.
 
 ## 3. Skill behaviour: remaining fixtures (executed, 7 invocations, one each)
 
