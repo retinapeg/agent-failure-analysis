@@ -9,7 +9,7 @@ sessions had finished. The hashes verified after copying (`shasum -a 256 -c FROZ
 
 - Package under test: `agent-failure-analysis-0.1.1.zip` built at commit `8fe396c`, sha256 `194a8ddd7188d5901e21d1af44f99231f4e0b37c4239524c69f15e0cc0eb95ab`. Its manifest is saved as `MANIFEST-of-tested-package.txt`.
 - Three throwaway project directories outside this repository, each with the ZIP unzipped into `<project>/.claude/skills/` and the case input copied into `<project>/input/`. Nothing else in the project.
-- Host: Claude Code 2.1.280, print mode, `--output-format stream-json --verbose`, `--max-turns 60`, tools limited with `--allowedTools` to Read, Write, Edit, Glob, Grep, Skill, and Bash for `python3`, `mkdir`, `ls`, `cat`. Permission mode `default`. No skip-permissions flag.
+- Host: Claude Code 2.1.280, print mode, `--output-format stream-json --verbose`, `--max-turns 60`, Read, Write, Edit, Glob, Grep, Skill, and Bash for `python3`, `mkdir`, `ls`, `cat` pre-approved with `--allowedTools`. That flag pre-approves; it does not restrict: the init event lists all 31 built-in tools as available. Permission mode `default`. No skip-permissions flag.
 - Model, recorded from every assistant event in the streams: `claude-opus-5-5` (the CLI's default on this machine). This differs from the V0 subagent sessions, which inherited the building session's model.
 - Prompts were natural requests that did not name the skill, so auto-invocation was tested. Case C's prompt gave the task and success criterion in words, since a plain log carries neither.
 - Full event streams: `runs/case-*.stream.jsonl`. Outputs as the sessions left them: `outputs/case-*/`. Stderr was empty for all three.

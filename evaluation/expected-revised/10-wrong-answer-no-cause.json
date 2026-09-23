@@ -1,0 +1,52 @@
+{
+  "fixture": "10-wrong-answer-no-cause",
+  "note": "Revised key v2, written 2026-09-23 per Leo's release decision: an incorrect final answer can establish an output failure but does not establish a reasoning/calculation cause or causal step without supporting evidence. The original key is preserved unchanged in evaluation/expected/. Written after the recorded runs; a development label, not ground truth.",
+  "allowed_outcomes": [
+    {
+      "status": "failure",
+      "basis": [
+        "evaluator_observation",
+        "criteria_match"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "e2 / final_output is Sydney.",
+    "criterion: Answer is Canberra",
+    "evaluator o1 verdict fail",
+    "no tool calls; tool policy optional"
+  ],
+  "permitted_interpretations": [
+    "the final answer does not satisfy the criterion",
+    "why is unknown; only hypotheses"
+  ],
+  "prohibited_claims": [
+    "any established cause (e.g. confused largest city with capital)",
+    "not using web_search caused the error",
+    "tool_selection or instruction_following failure",
+    "divergence identified at e2: the wrong answer is the output, not an evidenced causal step",
+    "any cause of the wrong answer stated as established"
+  ],
+  "categories": {
+    "expected_any": [
+      "reasoning_calculation",
+      "other_unknown"
+    ],
+    "allow_empty": true,
+    "forbidden": [
+      "tool_selection",
+      "instruction_following",
+      "tool_execution",
+      "environment_provider",
+      "evaluation_task_design"
+    ],
+    "condition": "a reasoning_calculation or other_unknown finding may state only that the final answer fails the criterion (an output failure). Its interpretation must not assert a cause or a causal step as established; causes belong in hypotheses."
+  },
+  "divergence": {
+    "allowed": [
+      "unknown"
+    ],
+    "event_ids": []
+  },
+  "regression_test": "either"
+}

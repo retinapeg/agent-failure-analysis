@@ -1,0 +1,1 @@
+The extra file in this folder (not report.json, report.md, or check.json) was copied here by the implementing session after the run, from the session's scratch output directory. It is what the session left behind; its provenance rests on the implementing session's statement and cannot be verified independently.

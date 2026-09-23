@@ -1,0 +1,10 @@
+# agent-failure-analysis release manifest
+# version 0.1.1
+# sha256  path
+c05931b212ef801ada3588a4c690dfb01848b0cb46d8496cc6714f9fb2810a0f  agent-failure-analysis/SKILL.md
+4bc52fb9e9d2f62a159cc5f1d0932bab0fd93bd359a7c75a43a9908776ab07dd  agent-failure-analysis/references/bundle-schema.md
+4b7beb8ba0a01423566cc25e998dd5e93e3dfc8a50bd40b359f29a96978967b9  agent-failure-analysis/references/evidence-contract.md
+9fad2c9b79cd99b597687b4f7e569651a16e2979cc5b1185c0c505139b2d6eba  agent-failure-analysis/references/failure-taxonomy.md
+2c7963fd805b2d26e01d9b13de7671aa2d53155247a9cb86fdacbf9675ca3fe0  agent-failure-analysis/references/report-schema.md
+67bb16dd82de9b910508b64c1e7fc0b70bf8117e592d224c602c7c641a58df49  agent-failure-analysis/scripts/trace_tools.py
+4b6295f0f572233ed96fe51ac82302004b81e8327a19b642cfada802deecb183  agent-failure-analysis/INSTALL.md

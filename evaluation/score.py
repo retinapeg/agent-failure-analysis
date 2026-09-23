@@ -5,7 +5,7 @@ The keys were written after the runs by the implementing session; they are devel
 not independent ground truth. This script checks outcome, category membership, divergence, and
 whether a regression test is present. A key-prohibited category can be a placement error (a true
 non-failure filed as a finding) or an unsupported diagnosis; only a reader can tell which.
-Usage: python3 evaluation/score.py <report.json> [<report.json> ...]
+Usage: python3 evaluation/score.py [--keys DIR] <report.json> [<report.json> ...]
 """
 import json
 import sys
@@ -19,9 +19,9 @@ def fixture_for(report_path: Path) -> str:
     return rid.replace("syn-", "", 1)
 
 
-def score(report_path: Path) -> dict:
+def score(report_path: Path, keys: Path = EXPECTED) -> dict:
     r = json.loads(report_path.read_text())
-    key = json.loads((EXPECTED / f"{fixture_for(report_path)}.json").read_text())
+    key = json.loads((keys / f"{fixture_for(report_path)}.json").read_text())
     out = {}
     o = r["outcome"]
     cats = [f["category"] for f in r["findings"]]
@@ -67,8 +67,12 @@ def score(report_path: Path) -> dict:
 
 
 def main(argv):
+    keys = EXPECTED
+    if argv and argv[0] == "--keys":
+        keys = Path(argv[1])
+        argv = argv[2:]
     for p in argv:
-        s = score(Path(p))
+        s = score(Path(p), keys)
         print(f"{p}: " + " | ".join(f"{k}={v}" for k, v in s.items()))
 
 

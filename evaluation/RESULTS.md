@@ -160,7 +160,10 @@ freeze is provable: `e2e/FROZEN.sha256` was committed before the sessions ran.
 checker output (`pilot/03-skill-r2/first-attempt-check.json`, three empty-excerpt
 errors). Every other count is the session's own statement. 05-plain-r2 wrote
 a generator script (`pilot/05-plain-r2/build_report.py`) rather than the JSON
-directly; it is preserved.
+directly; it is preserved. Both of those files were copied into the pilot
+folders by the implementing session after the runs, from the sessions'
+scratch output; they are what the sessions left behind, but their provenance
+cannot be verified independently of this statement.
 
 **Corrections to the earlier record.**
 - The earlier section 4 said the 19 analysis sessions "ran the scripts and workflow from the same folder layout" as the ZIP. They ran from the source repository. Only the discovery check used the ZIP. Corrected above.
