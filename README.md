@@ -68,17 +68,17 @@ Nothing here installs itself. Build or take the ZIP, then copy one folder.
 
 ```bash
 python3 scripts/build_release.py
-# → dist/agent-failure-analysis-0.1.0.zip and its .sha256
+# → dist/agent-failure-analysis-0.1.1.zip and its .sha256
 ```
 
 Claude Code (tested with 2.1.280): personal or project scope.
 
 ```bash
-unzip dist/agent-failure-analysis-0.1.0.zip -d ~/.claude/skills/
+unzip dist/agent-failure-analysis-0.1.1.zip -d ~/.claude/skills/
 ```
 
 ```bash
-unzip dist/agent-failure-analysis-0.1.0.zip -d .claude/skills/
+unzip dist/agent-failure-analysis-0.1.1.zip -d .claude/skills/
 ```
 
 Codex (format-compatible, untested): `.agents/skills/` or `~/.agents/skills/`.
@@ -112,10 +112,11 @@ python3 $T render work/report.json -o work/report.md
 
 Recorded in `evaluation/RESULTS.md`. In short:
 
-- Deterministic tests: 59 pytest cases, all passing on this machine.
-- Skill behaviour: 19 fresh Claude Code subagent sessions (`claude-fable-5-1`) across ten synthetic fixtures. Every skill-condition report passed the checker and matched the answer key on outcome, categories, and divergence. The comparative pilot (12 runs, three fixtures, skill versus a plain prompt with the same schema) showed the plain condition filing key-prohibited findings in 4 of 6 runs and producing checker-rejected reports in 3 of 6; the skill condition did neither.
-- Installation: the ZIP was unzipped into an isolated project and Claude Code listed the skill.
-- Semantic labels are the implementing session's and are marked **unreviewed** until Leo reads the reports. Twelve pilot runs of one model are not a reliability estimate.
+- Deterministic tests: 62 pytest cases, all passing on this machine.
+- Skill behaviour, V0 build: 19 fresh Claude Code subagent sessions (`claude-fable-5-1`) across ten synthetic fixtures, running the skill from the source repository. All 19 skill-condition reports passed the checker and matched the retrospective answer keys on outcome, categories, and divergence. The keys were written afterwards by the same session that built the skill; they are development labels, not ground truth.
+- Exploratory pilot, 12 runs on three fixtures: a plain prompt given only the schema produced one unsupported diagnosis, three truthful non-failures filed in the findings field, two invalid references, and one schema error across six runs; the skill condition produced none of those on the same six. This is not a reliability estimate and does not establish that the skill beats plain prompting.
+- Release package: the 0.1.1 ZIP was installed in isolated throwaway projects and exercised end to end by fresh Claude Code sessions on three new frozen cases. See `evaluation/e2e/RESULTS.md` for what happened.
+- Every semantic label is the implementing session's and is marked **unreviewed** until Leo reads the reports.
 
 ## Limitations
 

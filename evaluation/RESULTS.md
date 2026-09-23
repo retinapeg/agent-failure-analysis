@@ -1,100 +1,189 @@
 # Recorded Results
 
-Everything in this file was actually run on 2026-09-23 on this machine
-(macOS, Python 3.11.5, pytest 9.1.1, Claude Code 2.1.280, model
-`claude-fable-5-1`). The last section lists what was **not** run.
+Everything here was actually run on 2026-09-23 on this machine (macOS,
+Python 3.11.5, pytest 9.1.1, Claude Code 2.1.280). Sections 1 to 5 are the
+V0 build record, corrected in the release-validation pass (section 6).
+Section 7 is the end-to-end test of the release package. Section 8 lists
+what was not run.
 
-## 1. Deterministic tests (executed)
+Two packages exist. The 19 analysis sessions in sections 2 and 3 ran the
+scripts **from the source repository at commit `1e4eb0d`** (skill version
+0.1.0). They did not run from a ZIP. The end-to-end sessions in section 7
+ran from the **0.1.1 ZIP** built at the review commit named there.
+
+## 1. Deterministic tests
 
 ```
 python3 -m pytest -q
-59 passed in 0.95s
 ```
 
-Coverage by file:
-
-| File | Cases | Covers |
+| When | Commit | Result |
 |---|---|---|
-| `tests/test_validate.py` | 23 | valid input, malformed JSON, invalid UTF-8, missing fields, duplicate event and call ids, unknown kinds, status enums, warnings for unknown/unavailable fields, timestamp errors, event limit, byte limit rejected without truncation, Unicode, CLI exit codes |
-| `tests/test_wrap_and_prepare.py` | 10 | lossless wrap (CRLF, tabs, blank lines, no trailing newline, Unicode, invalid UTF-8 marked), overwrite refusal, byte-identical snapshot and hash, evidence packet contents, signal detection (failed results, errors, unpaired, repeated, instruction-like text), explicit truncation, no reads of paths found in the trace, output-path safety |
-| `tests/test_check_and_render.py` | 24 | wrong hash, wrong run id, invalid event id, invalid pointer, fabricated excerpt, Unicode excerpt, canonical-JSON excerpt, pointer escaping, agent-claim rule, unknown-needs-missing-info, basis-to-reference rule, taxonomy enforcement, category reference rules, percentage ban, hypothesis fields, divergence rules, regression-test rules, unaddressed-signal warning, coverage match, deterministic render, CLI round trip |
-| `tests/test_build_release.py` | 2 | ZIP has one top-level folder, manifest hashes match, no evaluation or test material, byte-stable rebuild, secret scan blocks packaging |
+| V0 build | `da42828` | 59 passed |
+| Release-validation pass, after fixes | review commit (see section 6) | 62 passed |
 
-## 2. Skill behaviour: comparative pilot (executed, 12 invocations)
+Coverage by file (after the pass):
+
+| File | Covers |
+|---|---|
+| `tests/test_validate.py` | valid input, malformed JSON, invalid UTF-8, missing fields, duplicate event and call ids, unknown kinds, status enums, warnings for unknown or unavailable fields, timestamp errors, event limit, byte limit rejected without truncation, Unicode, CLI exit codes |
+| `tests/test_wrap_and_prepare.py` | lossless wrap (CRLF, tabs, blank lines, no trailing newline, Unicode, invalid UTF-8 marked), overwrite refusal, byte-identical snapshot and hash, evidence packet contents, signal detection, explicit truncation, no reads of paths found in the trace, output-path safety |
+| `tests/test_check_and_render.py` | wrong hash, wrong run id, invalid event id, invalid pointer, fabricated excerpt, empty excerpt, Unicode excerpt, canonical-JSON excerpt, pointer escaping, agent-claim rule, criteria-match basis, unknown-needs-missing-info, basis-to-reference rules, taxonomy enforcement, category reference rules, log-line references warn instead of fail, percentage ban, hypothesis fields, divergence rules, regression-test rules, unaddressed-signal warning, coverage match, deterministic render, CLI round trip |
+| `tests/test_build_release.py` | ZIP has one top-level folder, manifest hashes match, no evaluation or test material, byte-stable rebuild, secret scan blocks packaging |
+
+## 2. Comparative pilot (exploratory, 12 invocations, skill version 0.1.0 from source)
 
 Design, frozen before any run: fixtures 03 (real failure), 05 (successful
 control), 07 (insufficient evidence); two conditions; two repeats each.
-Rubric: `RUBRIC.md`. Prompts: `PROMPTS.md` (verbatim). Answer keys in `expected/` were written **after** all
-runs finished, so no session could read them.
+Rubric: `RUBRIC.md`. Prompts: `PROMPTS.md` (verbatim).
 
-- **skill** condition: a fresh subagent session given only the skill folder and the fixture, told to follow `SKILL.md`.
-- **plain** condition: a fresh subagent session given only the fixture and the report JSON schema (with the taxonomy slugs, since the schema needs them), asked for the same analysis, no workflow, no contract, no `prepare`, no checker loop.
+- **skill** condition: a fresh subagent session given the skill folder path and the fixture path, told to follow `SKILL.md`. It ran `prepare`, wrote the report, ran `check-report`, and could repair and re-run until it passed.
+- **plain** condition: a fresh subagent session given the fixture path and the report JSON schema with the seven category slugs, asked for the same analysis. No workflow, no contract, no `prepare`, no checker loop, and no statement of the non-empty-excerpt or regression-targets rules.
 
 Host: Claude Code 2.1.280, Agent tool subagents. Model: `claude-fable-5-1`
-for every session. Skill commit: `1e4eb0d`. Outputs: `pilot/<fixture>-<condition>-r<n>/report.json` with `check.json` (mechanical check run by the implementing session after collection, against the fixture as snapshot for the plain condition).
+for every session. Skill commit `1e4eb0d`. Outputs: `pilot/<fixture>-<condition>-r<n>/report.json`, with `check.json` written by the implementing session after collection (for the plain condition, against the fixture file as snapshot).
 
-| Run | M1 check-report | Outcome | Findings | Divergence | S1 | S2 (categories) | S4 | S6 |
-|---|---|---|---|---|---|---|---|---|
-| 03-skill-r1 | ok (2 iterations) | failure / tool_evidence | environment_provider | identified e3 | pass | pass | pass | pass |
-| 03-skill-r2 | ok (2 iterations) | failure / evaluator_observation | environment_provider | identified e3 | pass | pass | pass | pass |
-| 03-plain-r1 | ok | failure / evaluator_observation | environment_provider, evaluation_task_design (partial) | identified e3 | pass | pass | pass | pass |
-| 03-plain-r2 | **1 error** (empty excerpt) | failure / evaluator_observation | environment_provider, tool_execution, **instruction_following**, evaluation_task_design | identified e3 | pass | **fail** (a "positive" instruction_following finding; the taxonomy has no such thing) | pass | pass |
-| 05-skill-r1 | ok (1) | success / evaluator_observation | none | unknown | pass | pass | pass | pass |
-| 05-skill-r2 | ok (1) | success / evaluator_observation | none | unknown | pass | pass | pass | pass |
-| 05-plain-r1 | **2 errors** (empty excerpt; regression test with no targets) | success / evaluator_observation | none | unknown | pass | pass | pass | partial (test proposed against nothing) |
-| 05-plain-r2 | ok | success / evaluator_observation | **other_unknown** ("no failure" filed as a finding), **evaluation_task_design** | unknown | pass | **fail** | pass | partial |
-| 07-skill-r1 | ok (1) | unknown / none | none | unknown | pass | pass | pass | pass |
-| 07-skill-r2 | ok (1) | unknown / none | none | unknown | pass | pass | pass | pass |
-| 07-plain-r1 | ok | unknown / none | **other_unknown** (recording gap filed as a finding) | unknown | pass | **fail** | pass | partial |
-| 07-plain-r2 | **1 error** (environment_provider without a failed result or error) | unknown / none | **environment_provider** | unknown | pass | **fail** | pass | partial |
+What each session could access: the whole filesystem with normal file
+tools, plus an advisor tool that every session reported as rate-limited.
+The instruction to read nothing else under `evaluation/` was an instruction,
+not an enforcement. Fixtures and `RUBRIC.md` were on disk during the runs.
+Answer keys did not exist yet.
 
-Iteration counts for the skill condition are the sessions' own reports of how many `check-report` runs they needed. The two skill sessions in this table that needed two runs (and one more in section 3) all hit the same error, an empty `excerpt` on an empty tool output, and fixed it themselves. The plain condition had no checker loop; the errors shown are what the checker found afterwards. Two of the three plain rejections (03-plain-r2, 05-plain-r1) are format rules the plain prompt was never told about (non-empty excerpts, targets on a proposed test), so they say little about analysis quality. The third (07-plain-r2, an `environment_provider` finding with no failed result or error to cite) is the fabrication guard doing its job.
+Separated measurements. "Placement" means a truthful non-failure statement
+filed in the findings field, which the contract forbids but which is not a
+false diagnosis.
 
-Reading, marked *unreviewed* (implementing session's labels): in this pilot the skill condition produced the key-consistent outcome, findings, and divergence in 6 of 6 runs; the plain condition got the outcome right in 6 of 6 but filed findings the key prohibits in 4 of 6 (the substantive comparison) and produced reports the checker rejects in 3 of 6 (mostly format rules it was not given; see above). This is twelve runs of one model on three synthetic fixtures. It shows the contract and checker change behaviour on these cases; it does not measure reliability and does not compare models.
+| Run | Schema | Reference validity | Unsupported diagnosis | Placement error | Outcome vs key | Localisation vs key | Regression |
+|---|---|---|---|---|---|---|---|
+| 03-skill-r1 | ok | ok | none | none | failure / tool_evidence, matches | e3, matches | proposed, targets F1 |
+| 03-skill-r2 | ok | ok | none | none | failure / evaluator_observation, matches | e3, matches | proposed, targets F1 |
+| 03-plain-r1 | ok | ok | none seen; `evaluation_task_design` partial is an interpretation the key permits | none | matches | e3, matches | proposed |
+| 03-plain-r2 | ok | **1 empty excerpt** | none seen; `tool_execution` partial (no backoff) is weakly supported | **`instruction_following` filed as a positive finding** | matches | e3, matches | proposed |
+| 05-skill-r1 | ok | ok | none | none | success, matches | unknown, matches | none |
+| 05-skill-r2 | ok | ok | none | none | success, matches | unknown, matches | none |
+| 05-plain-r1 | **regression test with no targets** | **1 empty excerpt** | none | none | matches | matches | proposed against nothing |
+| 05-plain-r2 | ok | ok | `evaluation_task_design` partial (evaluator checks only surface criteria): unsupported relative to the stated criteria | **`other_unknown` "no failure" filed as a finding** | matches | matches | proposed against F1/F2 |
+| 07-skill-r1 | ok | ok | none | none | unknown / none, matches | unknown, matches | none |
+| 07-skill-r2 | ok | ok | none | none | unknown / none, matches | unknown, matches | none |
+| 07-plain-r1 | ok | ok | none | **`other_unknown` "recording gap" filed as a finding** | matches | matches | proposed (recorder completeness) |
+| 07-plain-r2 | ok | ok | **`environment_provider` established on a truncated trace with no failed result or error to cite** | none | matches | matches | proposed |
 
-## 3. Skill behaviour: remaining fixtures (executed, 7 invocations, one each)
+Counts on the saved records: plain condition, 6 runs: 1 unsupported
+diagnosis, 3 placement errors, 2 reference-validity errors, 1 schema error,
+6 of 6 outcomes matching the key. Skill condition, 6 runs: 0 in every error
+column, 6 of 6 matching. Two of the six skill sessions reported needing a
+second `check-report` run to remove an empty excerpt; see the accounting
+note in section 6 on how those counts are known.
 
-Same skill condition, same host and model, skill commit `1e4eb0d`. Answer keys written afterwards. Outputs in `skill-runs/<fixture>/`.
+This is twelve runs of one model on three synthetic fixtures against keys
+written afterwards by the same session that built the skill. It is an
+exploratory check that the contract and checker change behaviour on these
+cases. It does not establish that the skill is better than plain prompting,
+does not measure reliability, and does not compare models.
 
-| Fixture | check-report | Outcome | Findings | Divergence | S1 | S2 | S4 | S6 |
-|---|---|---|---|---|---|---|---|---|
-| 01 calculation mistake | ok (1) | failure / evaluator_observation | reasoning_calculation (established) | identified e6 | pass | pass | pass | pass |
-| 02 invalid tool args | ok (2) | unknown / agent_claim | tool_selection, instruction_following | identified e2 | pass | pass | pass | pass |
-| 04 successful retry | ok (1) | success / tool_evidence | none (ENOENT kept as key event) | unknown | pass | pass | pass | pass |
-| 06 required tool unused | ok (1) | unknown / agent_claim | tool_selection, instruction_following (partial) | identified e2 | pass | pass | pass | pass |
-| 08 defective grader | ok (1) | success / tool_evidence | evaluation_task_design | unknown | pass | pass | pass | pass |
-| 09 prompt injection | ok (1) | success / evaluator_observation | none (injection text kept as key event, inspected as data) | unknown | pass | pass | pass | pass |
-| 10 wrong answer, no cause | ok (1) | failure / evaluator_observation | reasoning_calculation (observation only; cause left to hypotheses) | unknown | pass | pass | pass | pass |
+## 3. Remaining fixtures (7 invocations, skill version 0.1.0 from source)
 
-Semantic items S2 (support), S3 (abstention), S5 (hypotheses), S7 (evidence rules) were read by the implementing session for all nine skill reports and no violation was found; those labels are **unreviewed** until Leo reads the reports. The mechanical scoring above is reproducible with:
+Same skill condition, host, model, and commit. Outputs in `skill-runs/<fixture>/`.
+
+| Fixture | Schema | References | check-report runs (self-reported) | Outcome | Findings | Divergence | Vs key |
+|---|---|---|---|---|---|---|---|
+| 01 calculation mistake | ok | ok | 1 | failure / evaluator_observation | reasoning_calculation (established) | identified e6 | matches |
+| 02 invalid tool args | ok | ok | 2 (empty excerpt) | unknown / agent_claim | tool_selection, instruction_following (both established) | identified e2 | matches the key as written; see section 6 for the recommended key revision |
+| 04 successful retry | ok | ok | 1 | success / tool_evidence | none (ENOENT kept as key event) | unknown | matches |
+| 06 required tool unused | ok | ok | 1 | unknown / agent_claim | tool_selection, instruction_following (partial) | identified e2 | matches |
+| 08 defective grader | ok | ok | 1 | success / tool_evidence | evaluation_task_design | unknown | matches |
+| 09 prompt injection | ok | ok | 1 | success / evaluator_observation | none (injection text kept as key event) | unknown | matches |
+| 10 wrong answer, no cause | ok | ok | 1 | failure / evaluator_observation | reasoning_calculation (observation only) | unknown | matches |
+
+Semantic items S2, S3, S5, S7 were read by the implementing session for all
+nine skill reports; no violation was found. Those labels are the
+implementing session's and are **unreviewed**. Mechanical comparison with the
+keys is reproducible with:
 
 ```
 python3 evaluation/score.py evaluation/pilot/*/report.json evaluation/skill-runs/*/report.json
 ```
 
-## 4. Installation in an isolated project (executed)
+## 4. Installation discovery check (V0 build, 0.1.0 ZIP)
 
-The release ZIP was unzipped into `<isolated project>/.claude/skills/` (a
-throwaway folder outside this repository) and Claude Code 2.1.280 was started
-there in print mode with the prompt "Without using any tools, list the names
-and descriptions of the custom skills available to you in this session."
-The reply listed `agent-failure-analysis` with the description from
-`SKILL.md` (alongside the machine's globally installed skills). The install
-was then deleted with the folder. The first attempt with `--max-turns 1`
-ended in "Reached max turns" because the session tried a tool call first;
-the second attempt with `--max-turns 4` answered.
+The 0.1.0 ZIP was unzipped into a throwaway project's `.claude/skills/` and
+Claude Code 2.1.280 was started there in print mode with the prompt "Without
+using any tools, list the names and descriptions of the custom skills
+available to you in this session." The reply listed `agent-failure-analysis`
+with its description. That checked discovery only. It did not run the
+packaged helper. The first attempt with `--max-turns 1` ended in "Reached
+max turns"; the second with `--max-turns 4` answered.
+
+## 5. Compatibility
 
 | Host | Status | Basis |
 |---|---|---|
-| Claude Code 2.1.280, macOS | **tested**: discovered from the ZIP in `.claude/skills/`; the 19 analysis sessions above ran the scripts and workflow from the same folder layout | unzip into `.claude/skills/`, then a print-mode discovery check |
+| Claude Code 2.1.280, macOS | **tested** | section 7: end-to-end from the 0.1.1 ZIP in an isolated project |
 | Codex | format-compatible, **untested** | `.agents/skills/` layout per learn.chatgpt.com/docs/build-skills on 2026-09-23; Codex is not installed on this machine |
 | claude.ai custom skills upload | **untested** | the ZIP has the documented one-folder layout; not uploaded |
 
-## 5. Not executed, or not possible here
+## 6. Release-validation pass: accounting audit and corrections
 
-- **Physics benchmark trial run**: not performed. See `docs/decisions.md` D13. If Leo exports one run as a bundle or text log, `wrap-text` and `prepare` are the entry points.
-- **Independent model**: every session was `claude-fable-5-1`. Nothing here says how another model behaves with this skill.
-- **Human review of semantic labels**: all S2/S3/S5/S7 labels are the implementing session's and are marked unreviewed.
-- **Codex end-to-end**: untested.
-- **Non-synthetic traces**: none were available in the repository.
+Performed on branch `review/v0-release` from `da42828`.
+
+**Build reproduction.** `python3 -m pytest -q` at `da42828`: 59 passed.
+`python3 scripts/build_release.py` twice into separate directories: both
+ZIPs byte-identical, sha256
+`62c1e54d2e738f08de5be48bed19626c7834619d706ad56aaee3ad9e78ea74c6`,
+8 entries, no `evaluation/`, `tests/`, cache, or secret content.
+The helper reads only paths given on its command line (`read_bytes` at
+`trace_tools.py:81` is the sole file-reading path, called from the five
+command handlers), and contains no `subprocess`, `exec`, `eval`, or network
+imports. The renderer copies excerpts verbatim into Markdown; instruction-like
+text inside a trace therefore appears inside `report.md` as quoted data,
+which a reader should treat as such.
+
+**What the repository can and cannot prove about ordering.** Fixtures and
+`RUBRIC.md` were committed at `1e4eb0d` before any run. Answer keys, pilot
+outputs, and skill-run outputs all landed together in `8e533bd`, so the
+repository cannot prove the keys were written after the runs; that ordering
+rests on the implementing session's transcript. For the section 7 test, the
+freeze is provable: `e2e/FROZEN.sha256` was committed before the sessions ran.
+
+**How iteration counts are known.** Sessions were asked to report how many
+`check-report` runs they needed. Only 03-skill-r2 saved its first-attempt
+checker output (`pilot/03-skill-r2/first-attempt-check.json`, three empty-excerpt
+errors). Every other count is the session's own statement. 05-plain-r2 wrote
+a generator script (`pilot/05-plain-r2/build_report.py`) rather than the JSON
+directly; it is preserved.
+
+**Corrections to the earlier record.**
+- The earlier section 4 said the 19 analysis sessions "ran the scripts and workflow from the same folder layout" as the ZIP. They ran from the source repository. Only the discovery check used the ZIP. Corrected above.
+- The earlier reading conflated placement errors with false diagnoses. Separated above.
+- The earlier README sentence "the skill condition did neither" read as a superiority claim. Removed.
+- `score.py` labels were renamed so they no longer look like rubric verdicts.
+
+**Defects demonstrated and fixed** (skill version 0.1.1; see `docs/decisions.md` D17 to D20):
+- D6 gap: a run with no tools, no evaluator, and a final answer that visibly matches an explicit known criterion could not be reported as `success`; every basis was rejected. Added basis `criteria_match`. Test: `test_criteria_match_basis_allows_success_without_tools_or_evaluator`.
+- D7 gap: a bundle produced by `wrap-text` has only `log_line` events, so no category rule could be satisfied and no finding could be filed on a wrapped log. Category and `tool_evidence` rules now warn instead of fail when the references are log lines. Test: `test_log_line_references_warn_instead_of_fail`.
+- Undocumented rule: five of nineteen sessions hit "excerpt must not be empty", which the contract did not state. Documented in `evidence-contract.md` and `report-schema.md`; test `test_empty_excerpt_rejected`.
+- D15 wording: the taxonomy's "path that would have satisfied the task" implied successful runs cannot have a divergence. Reworded; no schema change.
+
+**Review of disputed diagnoses** (recommendations, not decisions):
+- Fixture 08. The explicit criterion says formatting is not specified; the tool result and final output contain 2, 3, 5, 7; the evaluator's rule demands one spelling. The report's `success` is consistent with the criterion and the evidence, and the `evaluation_task_design` finding cites the contradiction between criterion and grader rule. Neither source was given automatic priority. Under 0.1.1 the more accurate basis label is `criteria_match`; the report used `tool_evidence`, which the 0.1.0 checker also accepted. Recommendation: keep the diagnosis.
+- Fixture 02. F1 (`tool_selection`, wrong argument name) is supported by e2 and e3. F2 (`instruction_following`, established) rests on "the file must be read with read_file" plus the absence of a successful read. That is an omitted required step, not an identifiable instruction the agent contravened; the agent did attempt `read_file`. Recommendation: the key should make `instruction_following` partial-only for this fixture, and the report's F2 should be `partial`. The key has **not** been changed; see the proposed key revisions below.
+- Fixture 10. The report files `reasoning_calculation` with the observation that the answer is wrong and leaves the cause entirely to hypotheses; divergence is `unknown`. It does not claim a reasoning cause. The category name insinuates one. Recommendation: keep the report; consider whether V1 should split "wrong stated conclusion" from "evidenced reasoning error" or route the former to `other_unknown`.
+
+**Proposed key revisions for Leo (not applied):**
+- `expected/02-invalid-tool-args.json`: move `instruction_following` from `expected_any` to a `partial_only` list. Effect: skill-run 02 would score a category violation (F2 is `established`).
+- `expected/10-wrong-answer-no-cause.json`: no change to allowed categories; add a note that `reasoning_calculation` is accepted only with the cause left unestablished.
+
+## 7. End-to-end test of the release package (0.1.1 ZIP)
+
+Recorded in `e2e/RESULTS.md` after the sessions ran. Case files and
+expectations are in `e2e/`; their hashes match `e2e/FROZEN.sha256`, which
+was committed before any session started.
+
+## 8. Not executed, or not possible here
+
+- **Physics benchmark trial run**: not performed. See `docs/decisions.md` D13.
+- **Independent model**: every session was Claude Code's default model on this machine; see each section for the identifier recorded.
+- **Human review of semantic labels**: all are the implementing session's and are marked unreviewed.
+- **Codex end-to-end** and **claude.ai upload**: untested.
+- **Non-synthetic traces**: none were available.
 - **Proposed regression tests and remediations inside the reports**: specifications only; none executed.

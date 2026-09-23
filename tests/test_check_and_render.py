@@ -268,3 +268,69 @@ def test_render_refuses_non_report(tools_path, tmp_path):
     p.write_text("{}", encoding="utf-8")
     r = subprocess.run([sys.executable, str(tools_path), "render", str(p)], capture_output=True, text=True)
     assert r.returncode == 2
+
+
+def test_criteria_match_basis_allows_success_without_tools_or_evaluator(tools, bundle):
+    bundle["events"] = [{"id": "e1", "kind": "user_message", "content": {"text": "Capital of Australia?"}},
+                        {"id": "e2", "kind": "assistant_message", "content": {"text": "Canberra"}}]
+    bundle["success_criteria"] = {"status": "known", "criteria": ["Answer is Canberra"]}
+    bundle["final_output"] = {"status": "available", "text": "Canberra"}
+    bundle["evaluator"] = {"status": "unavailable"}
+    rep = minimal_report(bundle, sha(bundle))
+    rep["task"]["evidence_coverage"].update({"events_total": 2, "events_reviewed": 2})
+    rep["key_events"] = []
+    refs = [{"pointer": "/success_criteria/criteria/0", "excerpt": "Answer is Canberra"},
+            {"pointer": "/final_output/text", "excerpt": "Canberra"}]
+    rep["outcome"] = {"status": "success", "basis": "criteria_match", "statement": "Answer matches the criterion.", "references": refs}
+    errors, warnings = check(tools, bundle, rep)
+    assert errors == [] and warnings == []
+    # every other basis is rejected for this bundle
+    for basis in ("tool_evidence", "evaluator_observation", "external_verified", "agent_claim", "none"):
+        rep["outcome"]["basis"] = basis
+        errors, _ = check(tools, bundle, rep)
+        assert any("outcome" in e for e in errors), basis
+    # criteria_match needs known criteria and both reference kinds
+    rep["outcome"]["basis"] = "criteria_match"
+    rep["outcome"]["references"] = [{"pointer": "/final_output/text", "excerpt": "Canberra"}]
+    errors, _ = check(tools, bundle, rep)
+    assert any("requires a reference into /success_criteria" in e for e in errors)
+    rep["outcome"]["references"] = refs
+    bundle["success_criteria"] = {"status": "unknown"}
+    rep["task"]["criteria_status"] = "unknown"
+    errors, _ = check(tools, bundle, rep)
+    assert any("requires success_criteria.status 'known'" in e for e in errors)
+
+
+def test_log_line_references_warn_instead_of_fail(tools):
+    raw = b"task: fetch page\ntool_call http_get url=https://x\nERROR http_get: connection reset by peer\nagent: could not fetch\n"
+    lb = tools.wrap_text(raw, "log1", "fetch page", "test", True)
+    lb["success_criteria"] = {"status": "known", "criteria": ["page content reported"]}
+    digest = sha(lb)
+    rep = minimal_report(lb, digest)
+    rep["task"] = {"description_ref": {"pointer": "/task/description"}, "criteria_status": "known",
+                   "tool_policy_status": "unknown", "evidence_coverage": {"events_total": 4, "events_reviewed": 4, "note": "all"}}
+    rep["key_events"] = []
+    rep["outcome"] = {"status": "unknown", "basis": "none", "statement": "cannot tell", "references": []}
+    rep["missing_information"] = [{"item": "result", "discriminates": ""}]
+    refs = [{"event_id": "L3", "pointer": "/content/text", "excerpt": "connection reset"},
+            {"event_id": "L2", "pointer": "/content/text", "excerpt": "http_get"}]
+    for cat in ("tool_execution", "environment_provider", "reasoning_calculation", "instruction_following"):
+        rep["findings"] = [{"id": "F1", "category": cat, "observation": "line 3 shows a connection reset",
+                            "interpretation": "", "evidence_status": "partial", "references": refs}]
+        errors, warnings = check(tools, lb, rep)
+        assert errors == [], (cat, errors)
+        assert any("log_line" in w and "Reviewer must check" in w for w in warnings), cat
+    # tool_evidence basis on log lines: warning, not error
+    rep["findings"] = []
+    rep["outcome"] = {"status": "failure", "basis": "tool_evidence", "statement": "reset", "references": refs}
+    rep["missing_information"] = []
+    errors, warnings = check(tools, lb, rep)
+    assert errors == []
+    assert any("tool_evidence rests on unstructured log_line" in w for w in warnings)
+
+
+def test_empty_excerpt_rejected(tools, bundle):
+    rep = minimal_report(bundle, sha(bundle))
+    rep["key_events"][0]["references"] = [{"event_id": "e3", "pointer": "/content/output", "excerpt": ""}]
+    errors, _ = check(tools, bundle, rep)
+    assert any("excerpt must not be empty" in e for e in errors)

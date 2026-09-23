@@ -19,7 +19,7 @@ References use the format in `evidence-contract.md` section 2.
   },
   "outcome": {
     "status": "success | failure | unknown",
-    "basis": "evaluator_observation | tool_evidence | external_verified | agent_claim | none",
+    "basis": "evaluator_observation | tool_evidence | criteria_match | external_verified | agent_claim | none",
     "statement": "text",
     "references": [ {"event_id": "...", "pointer": "...", "excerpt": "..."} ]
   },
@@ -71,7 +71,8 @@ References use the format in `evidence-contract.md` section 2.
 Errors (report rejected):
 - Wrong `report_version`; `run_id` or `sha256` differing from the snapshot.
 - Any enumerated field outside its allowed values; any taxonomy slug not in the taxonomy.
-- Any reference whose event id, pointer, or excerpt does not resolve exactly.
+- Any reference whose event id, pointer, or excerpt does not resolve exactly, or whose excerpt is empty.
+- `outcome.basis` whose required reference kind is absent: `evaluator_observation` needs `/evaluator`, `tool_evidence` needs a `tool_result` event, `criteria_match` needs `/success_criteria` (status `known`) plus `/final_output` or an `assistant_message`, `external_verified` needs `/provenance`.
 - `outcome.status` not `unknown` with basis `agent_claim` or `none`, or with no references.
 - A finding with no references, an empty observation, or references that do not meet its category's required kinds.
 - `earliest_divergence` identified without an existing `event_id` and references.
@@ -84,6 +85,7 @@ Warnings (report accepted, reviewer should look):
 - Signal events from `evidence.json` that no reference cites (when `--evidence` is supplied).
 - `regression_test.targets` naming a hypothesis rather than a finding.
 - `events_reviewed` below `events_total`.
+- A finding or `tool_evidence` basis whose references are `log_line` events: the event-kind rule cannot be applied to unstructured lines, so the reviewer must check the excerpts.
 
 Every check-report run prints: *"Reference validity confirms that cited
 locations and excerpts exist in the snapshot. It does not confirm that any

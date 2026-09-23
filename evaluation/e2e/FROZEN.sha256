@@ -1,0 +1,7 @@
+# End-to-end release-validation cases, frozen 2026-09-23 BEFORE any session ran.
+# The files themselves were kept outside the repository until the sessions finished,
+# then copied in; their hashes must match these lines.
+7ee65bd43760119c428c02cdab8e31dd4bd9910c427294ef28061a7d45250532  inputs/case-a/bundle.json
+37b4a971ae3d1a268dfc77ba43a489cc4990b064e8caace79813162f653d82a8  inputs/case-b/bundle.json
+11e3fe9df493c9ab6820e10b78373144be647b8e4bd607908b86d233170973a6  inputs/case-c/run.log
+3647b34bfabcf793e7ee77aff34d066a6bfd0d3e2ac86e2431e88d1c479897d1  expectations.json

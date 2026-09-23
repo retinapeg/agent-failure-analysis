@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Score report.json files against evaluation/expected keys on the key-checkable rubric items.
+"""Compare report.json files with the retrospective keys in evaluation/expected.
 
-Covers S1 (outcome), S4 (divergence), and the category part of S2/S3 (forbidden or missing
-categories). S5, S6, S7 and the semantic half of S2 need a human reader. Prints one line per report.
+The keys were written after the runs by the implementing session; they are development labels,
+not independent ground truth. This script checks outcome, category membership, divergence, and
+whether a regression test is present. A key-prohibited category can be a placement error (a true
+non-failure filed as a finding) or an unsupported diagnosis; only a reader can tell which.
 Usage: python3 evaluation/score.py <report.json> [<report.json> ...]
 """
 import json
@@ -29,7 +31,7 @@ def score(report_path: Path) -> dict:
             if "only_with_category" in allowed and allowed["only_with_category"] not in cats:
                 continue
             ok = True
-    out["S1_outcome"] = "pass" if ok else f"fail ({o['status']}/{o['basis']})"
+    out["outcome_vs_key"] = "pass" if ok else f"fail ({o['status']}/{o['basis']})"
     kc = key["categories"]
     forbidden_hit = [c for c in cats if c in kc.get("forbidden", [])]
     partial_only = kc.get("partial_only", [])
@@ -37,29 +39,29 @@ def score(report_path: Path) -> dict:
     expected_any = kc.get("expected_any", [])
     missing = expected_any and not any(c in expected_any for c in cats) and not kc.get("allow_empty")
     if forbidden_hit or partial_viol:
-        out["S2_categories"] = f"fail (forbidden={forbidden_hit}, established-but-partial-only={partial_viol})"
+        out["key_prohibited_category"] = f"fail (forbidden={forbidden_hit}, established-but-partial-only={partial_viol})"
     elif missing:
-        out["S2_categories"] = f"partial (none of expected {expected_any} present; findings={cats})"
+        out["key_prohibited_category"] = f"partial (none of expected {expected_any} present; findings={cats})"
     else:
-        out["S2_categories"] = "pass"
+        out["key_prohibited_category"] = "pass"
     d = r["earliest_divergence"]
     kd = key["divergence"]
     if d["status"] not in kd["allowed"]:
-        out["S4_divergence"] = f"fail ({d['status']})"
+        out["divergence_vs_key"] = f"fail ({d['status']})"
     elif d["status"] == "identified" and kd["event_ids"] and d.get("event_id") not in kd["event_ids"]:
-        out["S4_divergence"] = f"fail (identified at {d.get('event_id')}, key allows {kd['event_ids']})"
+        out["divergence_vs_key"] = f"fail (identified at {d.get('event_id')}, key allows {kd['event_ids']})"
     elif kd.get("preferred") and d["status"] != kd["preferred"]:
-        out["S4_divergence"] = f"partial ({d['status']}; key prefers {kd['preferred']})"
+        out["divergence_vs_key"] = f"partial ({d['status']}; key prefers {kd['preferred']})"
     else:
-        out["S4_divergence"] = "pass"
+        out["divergence_vs_key"] = "pass"
     rt = r["regression_test"]["status"]
     want = key["regression_test"]
     if want == "expected":
-        out["S6_regression_present"] = "pass" if rt == "proposed" else "fail (none proposed)"
+        out["regression_present_vs_key"] = "pass" if rt == "proposed" else "fail (none proposed)"
     elif want == "none_expected":
-        out["S6_regression_present"] = "pass" if rt == "none" else "partial (proposed although no failure is expected)"
+        out["regression_present_vs_key"] = "pass" if rt == "none" else "partial (proposed although no failure is expected)"
     else:
-        out["S6_regression_present"] = "pass"
+        out["regression_present_vs_key"] = "pass"
     out["findings"] = cats
     return out
 

@@ -24,7 +24,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-SKILL_VERSION = "0.1.0"
+SKILL_VERSION = "0.1.1"
 BUNDLE_SCHEMA = "afa-bundle/1"
 REPORT_SCHEMA = "afa-report/1"
 DEFAULT_MAX_BYTES = 5_000_000
@@ -44,7 +44,7 @@ TAXONOMY = {
     "environment_provider", "evaluation_task_design", "other_unknown",
 }
 OUTCOME_STATUS = {"success", "failure", "unknown"}
-OUTCOME_BASIS = {"evaluator_observation", "tool_evidence", "external_verified", "agent_claim", "none"}
+OUTCOME_BASIS = {"evaluator_observation", "tool_evidence", "criteria_match", "external_verified", "agent_claim", "none"}
 EVIDENCE_STATUS = {"established", "partial", "contested"}
 DIVERGENCE_STATUS = {"identified", "unknown"}
 PROPOSAL_STATUS = {"proposed", "none"}
@@ -676,7 +676,18 @@ def check_report(report: Any, bundle: dict[str, Any], snapshot_sha256: str,
             if basis == "evaluator_observation" and "evaluator" not in kinds:
                 errors.append("outcome.basis evaluator_observation requires a reference into /evaluator")
             if basis == "tool_evidence" and "tool_result" not in kinds:
-                errors.append("outcome.basis tool_evidence requires a reference to a tool_result event")
+                if "log_line" in kinds:
+                    warnings.append("outcome.basis tool_evidence rests on unstructured log_line references; "
+                                    "the checker cannot confirm they are tool results. Reviewer must check the excerpts")
+                else:
+                    errors.append("outcome.basis tool_evidence requires a reference to a tool_result event")
+            if basis == "criteria_match":
+                if bundle["success_criteria"]["status"] != "known":
+                    errors.append("outcome.basis criteria_match requires success_criteria.status 'known'")
+                if "success_criteria" not in kinds:
+                    errors.append("outcome.basis criteria_match requires a reference into /success_criteria")
+                if not any(k in ("final_output", "assistant_message", "log_line") for k in kinds):
+                    errors.append("outcome.basis criteria_match requires a reference to /final_output or an assistant_message event")
             if basis == "external_verified" and "provenance" not in kinds:
                 errors.append("outcome.basis external_verified requires a reference into /provenance")
 
@@ -729,7 +740,10 @@ def check_report(report: Any, bundle: dict[str, Any], snapshot_sha256: str,
                 errors.append(f"{w}: at least one reference is required")
                 continue
             kinds = _check_refs(refs, w, bundle, by_id, errors, cited)
-            if cat in CATEGORY_RULES and len(kinds) == len(refs):
+            if cat in CATEGORY_RULES and len(kinds) == len(refs) and "log_line" in kinds:
+                warnings.append(f"{w}: category {cat!r} is supported by unstructured log_line references; "
+                                "the category evidence rule cannot be applied. Reviewer must check the excerpts")
+            elif cat in CATEGORY_RULES and len(kinds) == len(refs):
                 first, second, msg = CATEGORY_RULES[cat]
                 ok = (not first or any(k in first for k in kinds)) and (second is None or any(k in second for k in kinds))
                 if cat == "environment_provider" and ok:

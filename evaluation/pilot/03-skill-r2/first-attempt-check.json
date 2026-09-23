@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "errors": [
+    "key_events[2].references[1]: excerpt must not be empty",
+    "key_events[5].references[1]: excerpt must not be empty",
+    "earliest_divergence.references[1]: excerpt must not be empty"
+  ],
+  "warnings": [],
+  "notice": "Reference validity confirms that cited locations and excerpts exist in the snapshot. It does not confirm that any interpretation follows from them."
+}

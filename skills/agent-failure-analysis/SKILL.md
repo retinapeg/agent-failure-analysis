@@ -46,8 +46,10 @@ output directory, `WORK`.
 
 4. **Analyse under the contract.** Decide, in this order:
    - Outcome: `success`, `failure`, or `unknown`, and its basis. An agent's
-     own claim of success supports only `unknown`. Evaluator observations
-     are evidence of the evaluator's view and can be wrong.
+     own claim of success supports only `unknown`. An answer or artifact
+     that visibly satisfies explicit known criteria supports `success` with
+     basis `criteria_match`, even with no tools and no evaluator. Evaluator
+     observations are evidence of the evaluator's view and can be wrong.
    - Key observable events, including every signal in `evidence.json`.
    - Findings: only taxonomy categories, each with an observation (what the
      cited evidence literally contains) separated from an interpretation
@@ -55,7 +57,8 @@ output directory, `WORK`.
      key event, not a finding, unless it affected the outcome. No tool calls
      under an optional policy is not a finding.
    - Earliest evidenced divergence: `identified` only when one cited event
-     shows it; otherwise `unknown`.
+     shows it; otherwise `unknown`. A recovered error in a successful run
+     can still be the identified divergence.
    - Hypotheses: every causal explanation not established by an observation,
      each with what would confirm and what would refute it.
    - Missing information: what you needed and did not have, and which
@@ -67,8 +70,8 @@ output directory, `WORK`.
 
 5. **Write `WORK/report.json`** exactly to `references/report-schema.md`.
    `run_id` and `source.sha256` come from the `prepare` output. Every
-   observation carries references with exact excerpts copied from the
-   snapshot. Cite `/task`, `/tool_policy`, `/success_criteria`, `/evaluator`
+   observation carries references with exact, non-empty excerpts copied from
+   the snapshot (cite an empty field by pointer alone). Cite `/task`, `/tool_policy`, `/success_criteria`, `/evaluator`
    pointers for claims about the task frame.
 
 6. **Check.** `python3 T check-report WORK/report.json --snapshot WORK/snapshot.json --evidence WORK/evidence.json`.

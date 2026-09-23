@@ -7,7 +7,9 @@ can carry a `tool_execution` finding and still have outcome `success`.
 The **required references** column is enforced by `check-report`: a finding
 in that category whose references do not include the listed kind fails the
 check. This is the mechanical floor under "do not invent failures"; the
-semantic judgement remains the model's and the reviewer's.
+semantic judgement remains the model's and the reviewer's. For bundles made
+by `wrap-text`, whose events are all `log_line`, the checker cannot apply
+these rules and instead warns that the reviewer must read the excerpts.
 
 | Slug | Covers | Required references |
 |---|---|---|
@@ -30,7 +32,11 @@ semantic judgement remains the model's and the reviewer's.
 ## Earliest evidenced divergence
 
 Separately from categories, a report may name the earliest event at which the
-run observably departs from a path that would have satisfied the task. It is
-`identified` only when a specific event can be cited and the observation
-alone shows the departure. Otherwise it is `unknown`. A wrong final answer
-with no intermediate evidence leaves it `unknown`.
+run observably departs from expected progress on the task, whether or not
+the run later recovered. A successful outcome does not erase an evidenced
+earlier error: a failed call that was retried can be the identified
+divergence of a successful run. It is `identified` only when a specific
+event can be cited and the observation alone shows the departure. Otherwise
+it is `unknown`, and the statement should say whether that means no
+departure was observed or that one is suspected but not evidenced. A wrong
+final answer with no intermediate evidence leaves it `unknown`.

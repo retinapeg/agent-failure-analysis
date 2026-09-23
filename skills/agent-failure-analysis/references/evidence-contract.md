@@ -36,6 +36,12 @@ A reference is `{"event_id"?: string, "pointer"?: string, "excerpt"?: string}`.
 - At least one of `event_id` or `pointer` is required.
 - `excerpt`, when present, must be an exact substring of the resolved value
   (for strings) or of its canonical JSON (for anything else).
+- `excerpt` must be non-empty. To cite an empty field (for example an empty
+  tool output), give the pointer without an excerpt.
+- References to `log_line` events (bundles made by `wrap-text`) resolve like
+  any other, but the checker cannot tell what kind of thing a log line
+  records. Category and basis rules that depend on event kind are then
+  reported as warnings for the reviewer instead of errors.
 
 A valid reference proves that a location or quotation exists in the snapshot.
 **It does not prove that any interpretation follows from it.** The checker
@@ -49,6 +55,7 @@ The outcome is `success`, `failure`, or `unknown`, with a **basis**:
 |---|---|
 | `evaluator_observation` | An evaluator observation in the bundle states the result. Evaluators can be wrong; say so when relevant. |
 | `tool_evidence` | A tool result in the trace shows a success criterion met or missed. |
+| `criteria_match` | `success_criteria` is `known`, and the final output or an assistant message observably satisfies (or fails) those explicit criteria. This is the model's judgement that the stated answer or artifact meets the stated criteria; it needs no tool use and no evaluator. It does not cover claims the agent makes about work the trace does not show. |
 | `external_verified` | Provenance states the outcome was independently verified. |
 | `agent_claim` | Only the agent's own statement. **Permitted only with outcome `unknown`.** |
 | `none` | Nothing in the bundle bears on the outcome. Outcome must be `unknown`. |
