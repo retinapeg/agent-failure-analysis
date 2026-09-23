@@ -1,0 +1,120 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "syn-03-provider-failure",
+  "task": {
+    "description": "Fetch the current weather for Oslo from the weather API and report the temperature."
+  },
+  "success_criteria": {
+    "status": "known",
+    "criteria": [
+      "Reports a temperature for Oslo obtained from the weather API"
+    ]
+  },
+  "tool_policy": {
+    "status": "required",
+    "tools": [
+      "http_get"
+    ]
+  },
+  "events": [
+    {
+      "id": "e1",
+      "kind": "user_message",
+      "ts": "2026-09-20T10:00:01Z",
+      "content": {
+        "text": "What's the temperature in Oslo right now? Use the weather API."
+      }
+    },
+    {
+      "id": "e2",
+      "kind": "tool_call",
+      "ts": "2026-09-20T10:00:02Z",
+      "content": {
+        "call_id": "c1",
+        "tool": "http_get",
+        "args": {
+          "url": "https://api.weather.example/v1/current?city=Oslo"
+        }
+      }
+    },
+    {
+      "id": "e3",
+      "kind": "tool_result",
+      "ts": "2026-09-20T10:00:03Z",
+      "content": {
+        "call_id": "c1",
+        "ok": false,
+        "output": "",
+        "error": "HTTP 503 Service Unavailable from api.weather.example"
+      }
+    },
+    {
+      "id": "e4",
+      "kind": "assistant_message",
+      "ts": "2026-09-20T10:00:04Z",
+      "content": {
+        "text": "The weather API returned 503. Retrying once."
+      }
+    },
+    {
+      "id": "e5",
+      "kind": "tool_call",
+      "ts": "2026-09-20T10:00:05Z",
+      "content": {
+        "call_id": "c2",
+        "tool": "http_get",
+        "args": {
+          "url": "https://api.weather.example/v1/current?city=Oslo"
+        }
+      }
+    },
+    {
+      "id": "e6",
+      "kind": "tool_result",
+      "ts": "2026-09-20T10:00:06Z",
+      "content": {
+        "call_id": "c2",
+        "ok": false,
+        "output": "",
+        "error": "HTTP 503 Service Unavailable from api.weather.example"
+      }
+    },
+    {
+      "id": "e7",
+      "kind": "error",
+      "ts": "2026-09-20T10:00:07Z",
+      "content": {
+        "message": "http_get: provider unavailable after 2 attempts",
+        "call_id": "c2",
+        "fatal": false
+      }
+    },
+    {
+      "id": "e8",
+      "kind": "assistant_message",
+      "ts": "2026-09-20T10:00:08Z",
+      "content": {
+        "text": "The weather service is currently unavailable (HTTP 503 on two attempts), so I could not retrieve the temperature for Oslo."
+      }
+    }
+  ],
+  "final_output": {
+    "status": "available",
+    "text": "The weather service is currently unavailable (HTTP 503 on two attempts), so I could not retrieve the temperature for Oslo."
+  },
+  "evaluator": {
+    "status": "available",
+    "observations": [
+      {
+        "id": "o1",
+        "verdict": "fail",
+        "text": "No temperature was reported."
+      }
+    ]
+  },
+  "provenance": {
+    "source": "synthetic fixture authored by hand for the agent-failure-analysis evaluation suite",
+    "synthetic": true,
+    "notes": "SYNTHETIC. No real agent, model, provider, or user produced these events."
+  }
+}

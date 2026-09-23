@@ -1,0 +1,157 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "syn-04-successful-retry",
+  "task": {
+    "description": "Create the directory out/ if needed and write the text 'hi' to out/hello.txt."
+  },
+  "success_criteria": {
+    "status": "known",
+    "criteria": [
+      "out/hello.txt exists and contains exactly 'hi'"
+    ]
+  },
+  "tool_policy": {
+    "status": "required",
+    "tools": [
+      "write_file",
+      "bash",
+      "read_file"
+    ]
+  },
+  "events": [
+    {
+      "id": "e1",
+      "kind": "user_message",
+      "ts": "2026-09-20T10:00:01Z",
+      "content": {
+        "text": "Write 'hi' to out/hello.txt."
+      }
+    },
+    {
+      "id": "e2",
+      "kind": "tool_call",
+      "ts": "2026-09-20T10:00:02Z",
+      "content": {
+        "call_id": "c1",
+        "tool": "write_file",
+        "args": {
+          "path": "out/hello.txt",
+          "content": "hi"
+        }
+      }
+    },
+    {
+      "id": "e3",
+      "kind": "tool_result",
+      "ts": "2026-09-20T10:00:03Z",
+      "content": {
+        "call_id": "c1",
+        "ok": false,
+        "output": "",
+        "error": "ENOENT: no such file or directory, open 'out/hello.txt'"
+      }
+    },
+    {
+      "id": "e4",
+      "kind": "assistant_message",
+      "ts": "2026-09-20T10:00:04Z",
+      "content": {
+        "text": "The out/ directory does not exist yet. Creating it and retrying."
+      }
+    },
+    {
+      "id": "e5",
+      "kind": "tool_call",
+      "ts": "2026-09-20T10:00:05Z",
+      "content": {
+        "call_id": "c2",
+        "tool": "bash",
+        "args": {
+          "cmd": "mkdir -p out"
+        }
+      }
+    },
+    {
+      "id": "e6",
+      "kind": "tool_result",
+      "ts": "2026-09-20T10:00:06Z",
+      "content": {
+        "call_id": "c2",
+        "ok": true,
+        "output": ""
+      }
+    },
+    {
+      "id": "e7",
+      "kind": "tool_call",
+      "ts": "2026-09-20T10:00:07Z",
+      "content": {
+        "call_id": "c3",
+        "tool": "write_file",
+        "args": {
+          "path": "out/hello.txt",
+          "content": "hi"
+        }
+      }
+    },
+    {
+      "id": "e8",
+      "kind": "tool_result",
+      "ts": "2026-09-20T10:00:08Z",
+      "content": {
+        "call_id": "c3",
+        "ok": true,
+        "output": "wrote 2 bytes to out/hello.txt"
+      }
+    },
+    {
+      "id": "e9",
+      "kind": "tool_call",
+      "ts": "2026-09-20T10:00:09Z",
+      "content": {
+        "call_id": "c4",
+        "tool": "read_file",
+        "args": {
+          "path": "out/hello.txt"
+        }
+      }
+    },
+    {
+      "id": "e10",
+      "kind": "tool_result",
+      "ts": "2026-09-20T10:00:10Z",
+      "content": {
+        "call_id": "c4",
+        "ok": true,
+        "output": "hi"
+      }
+    },
+    {
+      "id": "e11",
+      "kind": "assistant_message",
+      "ts": "2026-09-20T10:00:11Z",
+      "content": {
+        "text": "Done. out/hello.txt now contains 'hi'."
+      }
+    }
+  ],
+  "final_output": {
+    "status": "available",
+    "text": "Done. out/hello.txt now contains 'hi'."
+  },
+  "evaluator": {
+    "status": "available",
+    "observations": [
+      {
+        "id": "o1",
+        "verdict": "pass",
+        "text": "out/hello.txt exists with content 'hi'."
+      }
+    ]
+  },
+  "provenance": {
+    "source": "synthetic fixture authored by hand for the agent-failure-analysis evaluation suite",
+    "synthetic": true,
+    "notes": "SYNTHETIC. No real agent, model, provider, or user produced these events."
+  }
+}

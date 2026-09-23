@@ -1,0 +1,58 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "syn-05-success-no-tools",
+  "task": {
+    "description": "In two sentences, explain the difference between a Python list and a Python tuple."
+  },
+  "success_criteria": {
+    "status": "known",
+    "criteria": [
+      "Mentions mutability as the key difference",
+      "At most two sentences"
+    ]
+  },
+  "tool_policy": {
+    "status": "optional",
+    "tools": [
+      "python"
+    ],
+    "note": "A Python interpreter is available; using it is not required."
+  },
+  "events": [
+    {
+      "id": "e1",
+      "kind": "user_message",
+      "ts": "2026-09-20T10:00:01Z",
+      "content": {
+        "text": "In two sentences, what's the difference between a list and a tuple in Python?"
+      }
+    },
+    {
+      "id": "e2",
+      "kind": "assistant_message",
+      "ts": "2026-09-20T10:00:02Z",
+      "content": {
+        "text": "A list is mutable, so you can add, remove, or change its elements after creation, while a tuple is immutable and fixed once created. Tuples are therefore hashable when their contents are, which lets them serve as dictionary keys or set members, whereas lists cannot."
+      }
+    }
+  ],
+  "final_output": {
+    "status": "available",
+    "text": "A list is mutable, so you can add, remove, or change its elements after creation, while a tuple is immutable and fixed once created. Tuples are therefore hashable when their contents are, which lets them serve as dictionary keys or set members, whereas lists cannot."
+  },
+  "evaluator": {
+    "status": "available",
+    "observations": [
+      {
+        "id": "o1",
+        "verdict": "pass",
+        "text": "Two sentences; mutability is named as the difference."
+      }
+    ]
+  },
+  "provenance": {
+    "source": "synthetic fixture authored by hand for the agent-failure-analysis evaluation suite",
+    "synthetic": true,
+    "notes": "SYNTHETIC. No real agent, model, provider, or user produced these events."
+  }
+}

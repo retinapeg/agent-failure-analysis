@@ -1,0 +1,56 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "syn-10-wrong-answer-no-cause",
+  "task": {
+    "description": "Answer the question: what is the capital city of Australia?"
+  },
+  "success_criteria": {
+    "status": "known",
+    "criteria": [
+      "Answer is Canberra"
+    ]
+  },
+  "tool_policy": {
+    "status": "optional",
+    "tools": [
+      "web_search"
+    ]
+  },
+  "events": [
+    {
+      "id": "e1",
+      "kind": "user_message",
+      "ts": "2026-09-20T10:00:01Z",
+      "content": {
+        "text": "What is the capital city of Australia?"
+      }
+    },
+    {
+      "id": "e2",
+      "kind": "assistant_message",
+      "ts": "2026-09-20T10:00:02Z",
+      "content": {
+        "text": "Sydney."
+      }
+    }
+  ],
+  "final_output": {
+    "status": "available",
+    "text": "Sydney."
+  },
+  "evaluator": {
+    "status": "available",
+    "observations": [
+      {
+        "id": "o1",
+        "verdict": "fail",
+        "text": "Expected 'Canberra', got 'Sydney.'"
+      }
+    ]
+  },
+  "provenance": {
+    "source": "synthetic fixture authored by hand for the agent-failure-analysis evaluation suite",
+    "synthetic": true,
+    "notes": "SYNTHETIC. No real agent, model, provider, or user produced these events."
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "syn-01-calculation-mistake",
+  "task": {
+    "description": "Compute the total cost of 3 items priced at 12.50 each plus 8% sales tax. Report the total to two decimal places."
+  },
+  "success_criteria": {
+    "status": "known",
+    "criteria": [
+      "Final answer equals 40.50"
+    ]
+  },
+  "tool_policy": {
+    "status": "optional",
+    "tools": [
+      "calculator"
+    ],
+    "note": "A calculator tool is available but not required."
+  },
+  "events": [
+    {
+      "id": "e1",
+      "kind": "user_message",
+      "ts": "2026-09-20T10:00:01Z",
+      "content": {
+        "text": "Compute the total cost of 3 items priced at 12.50 each plus 8% sales tax. Report the total to two decimal places."
+      }
+    },
+    {
+      "id": "e2",
+      "kind": "tool_call",
+      "ts": "2026-09-20T10:00:02Z",
+      "content": {
+        "call_id": "c1",
+        "tool": "calculator",
+        "args": {
+          "expression": "3 * 12.50"
+        }
+      }
+    },
+    {
+      "id": "e3",
+      "kind": "tool_result",
+      "ts": "2026-09-20T10:00:03Z",
+      "content": {
+        "call_id": "c1",
+        "ok": true,
+        "output": "37.5"
+      }
+    },
+    {
+      "id": "e4",
+      "kind": "tool_call",
+      "ts": "2026-09-20T10:00:04Z",
+      "content": {
+        "call_id": "c2",
+        "tool": "calculator",
+        "args": {
+          "expression": "37.50 * 0.08"
+        }
+      }
+    },
+    {
+      "id": "e5",
+      "kind": "tool_result",
+      "ts": "2026-09-20T10:00:05Z",
+      "content": {
+        "call_id": "c2",
+        "ok": true,
+        "output": "3.0"
+      }
+    },
+    {
+      "id": "e6",
+      "kind": "assistant_message",
+      "ts": "2026-09-20T10:00:06Z",
+      "content": {
+        "text": "Subtotal is 37.50. Tax at 8% is 2.80. Total: 37.50 + 2.80 = 40.30."
+      }
+    }
+  ],
+  "final_output": {
+    "status": "available",
+    "text": "Total: 40.30"
+  },
+  "evaluator": {
+    "status": "available",
+    "observations": [
+      {
+        "id": "o1",
+        "verdict": "fail",
+        "text": "Expected 40.50, got 40.30."
+      }
+    ]
+  },
+  "provenance": {
+    "source": "synthetic fixture authored by hand for the agent-failure-analysis evaluation suite",
+    "synthetic": true,
+    "notes": "SYNTHETIC. No real agent, model, provider, or user produced these events."
+  }
+}
