@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Build output
+dist/
+build/
+*.zip
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Scratch
+tmp/
+*.tmp
