@@ -52,26 +52,32 @@ Answer keys did not exist yet.
 
 Separated measurements. "Placement" means a truthful non-failure statement
 filed in the findings field, which the contract forbids but which is not a
-false diagnosis.
+false diagnosis. Rule applied to the "Unsupported diagnosis" column: a
+finding counts as unsupported only when its `evidence_status` is
+`established` and its own references do not show what it claims. A finding
+marked `partial` whose interpretation is weakly supported is noted in the
+cell but not counted; the same rule is applied to every run.
 
 | Run | Schema | Reference validity | Unsupported diagnosis | Placement error | Outcome vs key | Localisation vs key | Regression |
 |---|---|---|---|---|---|---|---|
 | 03-skill-r1 | ok | ok | none | none | failure / tool_evidence, matches | e3, matches | proposed, targets F1 |
 | 03-skill-r2 | ok | ok | none | none | failure / evaluator_observation, matches | e3, matches | proposed, targets F1 |
-| 03-plain-r1 | ok | ok | none seen; `evaluation_task_design` partial is an interpretation the key permits | none | matches | e3, matches | proposed |
-| 03-plain-r2 | ok | **1 empty excerpt** | none seen; `tool_execution` partial (no backoff) is weakly supported | **`instruction_following` filed as a positive finding** | matches | e3, matches | proposed |
+| 03-plain-r1 | ok | ok | none counted; `evaluation_task_design` partial is an interpretation the key permits | none | matches | e3, matches | proposed |
+| 03-plain-r2 | ok | **1 empty excerpt** | none counted; `tool_execution` partial (no backoff) is weakly supported | **`instruction_following` filed as a positive finding** | matches | e3, matches | proposed |
 | 05-skill-r1 | ok | ok | none | none | success, matches | unknown, matches | none |
 | 05-skill-r2 | ok | ok | none | none | success, matches | unknown, matches | none |
 | 05-plain-r1 | **regression test with no targets** | **1 empty excerpt** | none | none | matches | matches | proposed against nothing |
-| 05-plain-r2 | ok | ok | `evaluation_task_design` partial (evaluator checks only surface criteria): unsupported relative to the stated criteria | **`other_unknown` "no failure" filed as a finding** | matches | matches | proposed against F1/F2 |
+| 05-plain-r2 | ok | ok | none counted; `evaluation_task_design` partial (evaluator checks only surface criteria) is weakly supported relative to the stated criteria | **`other_unknown` "no failure" filed as a finding** | matches | matches | proposed against F1/F2 |
 | 07-skill-r1 | ok | ok | none | none | unknown / none, matches | unknown, matches | none |
 | 07-skill-r2 | ok | ok | none | none | unknown / none, matches | unknown, matches | none |
 | 07-plain-r1 | ok | ok | none | **`other_unknown` "recording gap" filed as a finding** | matches | matches | proposed (recorder completeness) |
 | 07-plain-r2 | ok | ok | **`environment_provider` established on a truncated trace with no failed result or error to cite** | none | matches | matches | proposed |
 
-Counts on the saved records: plain condition, 6 runs: 1 unsupported
-diagnosis, 3 placement errors, 2 reference-validity errors, 1 schema error,
-6 of 6 outcomes matching the key. Skill condition, 6 runs: 0 in every error
+Counts on the saved records: plain condition, 6 runs: 1 established
+unsupported diagnosis (07-plain-r2), 3 further `partial` interpretations
+noted as weakly supported and not counted, 3 placement errors, 2
+reference-validity errors, 1 schema error, 6 of 6 outcomes matching the
+key. Skill condition, 6 runs: 0 in every error
 column, 6 of 6 matching. Two of the six skill sessions reported needing a
 second `check-report` run to remove an empty excerpt; see the accounting
 note in section 6 on how those counts are known.
@@ -85,6 +91,9 @@ does not measure reliability, and does not compare models.
 ## 3. Remaining fixtures (7 invocations, skill version 0.1.0 from source)
 
 Same skill condition, host, model, and commit. Outputs in `skill-runs/<fixture>/`.
+These seven sessions were launched in the same step that copied the pilot
+outputs into `evaluation/pilot/`, so earlier reports were on disk during
+them; the instruction not to read them was not enforced.
 
 | Fixture | Schema | References | check-report runs (self-reported) | Outcome | Findings | Divergence | Vs key |
 |---|---|---|---|---|---|---|---|

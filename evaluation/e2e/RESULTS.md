@@ -15,8 +15,11 @@ sessions had finished. The hashes verified after copying (`shasum -a 256 -c FROZ
 - Full event streams: `runs/case-*.stream.jsonl`. Outputs as the sessions left them: `outputs/case-*/`. Stderr was empty for all three.
 
 Isolation actually achieved: the sessions could not see this repository
-and none of them referenced its path (checked across every tool input in
-the streams). They did share this machine's user-level Claude Code state:
+and none of them referenced its path. The frozen expectations and inputs
+sat on the same filesystem one directory above each project, readable in
+principle; a grep of every tool input in the three streams for the
+expectations file, the inputs folder, the freeze file, and the other two
+projects found no access. They did share this machine's user-level Claude Code state:
 four unrelated personal skills in `~/.claude/skills/`, user settings, and
 the harness's own bash-safety filter, which blocked two of case C's shell
 commands. That is the isolation available without a second machine.
@@ -59,5 +62,5 @@ session's, written before the runs but not reviewed by anyone else.
 
 | Package | Commit | sha256 | Covered by |
 |---|---|---|---|
-| 0.1.1 as tested here | `8fe396c` | `194a8ddd7188d5901e21d1af44f99231f4e0b37c4239524c69f15e0cc0eb95ab` | the three sessions above |
+| 0.1.1 as tested here (not kept on disk; `dist/` is ignored. The build is byte-stable, so checking out `8fe396c` and running `python3 scripts/build_release.py` reproduces this hash) | `8fe396c` | `194a8ddd7188d5901e21d1af44f99231f4e0b37c4239524c69f15e0cc0eb95ab` | the three sessions above |
 | 0.1.1 final (after the `report-schema.md` example fix) | review commit | `b06149d07e200fb1c9f4c1be60250696a188d4cd8c35e261db6a894263aeecfb` | **no end-to-end run**; differs from the tested package only in `references/report-schema.md` (one example value), per the manifest diff recorded in the commit message |
