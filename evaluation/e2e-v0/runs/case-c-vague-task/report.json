@@ -1,0 +1,134 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.0",
+  "run_id": "syn-e2e-c-vague-task",
+  "source": {"snapshot": "snapshot.json", "sha256": "9ebf107608d4129916d1557048db3cab53105f4b3ae89fd47702de2946d33f83"},
+  "task": {
+    "description_ref": {"pointer": "/task/description"},
+    "criteria_status": "unknown",
+    "tool_policy_status": "unknown",
+    "evidence_coverage": {
+      "events_total": 6,
+      "events_reviewed": 6,
+      "note": "All six events were read in full from snapshot.json. Signals: no failed tool results, no error events, no unpaired calls, no orphan results, no repeated identical calls, tool calls were present, and no instruction-like text was found in evidence. The single completion-keyword hit ('done' in e6) is recorded as a key event and treated as an unverified agent claim. The bundle is declared synthetic in provenance; no real agent produced these events."
+    }
+  },
+  "outcome": {
+    "status": "unknown",
+    "basis": "agent_claim",
+    "statement": "The agent read notes.md, wrote back a version with one duplicate line removed, and stated the file is tidy. Success criteria are unknown, no evaluator observations are available, and no tool result checks the result against any definition of 'tidy'. The only statement bearing on success is the agent's own claim, so the outcome cannot be determined from this bundle.",
+    "references": [
+      {"event_id": "e6", "pointer": "/content/text", "excerpt": "Done: I removed the duplicate 'buy milk' line. notes.md is tidy now."},
+      {"pointer": "/final_output/text", "excerpt": "Done: I removed the duplicate 'buy milk' line. notes.md is tidy now."},
+      {"pointer": "/success_criteria/status", "excerpt": "unknown"},
+      {"pointer": "/evaluator/status", "excerpt": "unavailable"},
+      {"pointer": "/task/description", "excerpt": "Tidy up notes.md."}
+    ]
+  },
+  "key_events": [
+    {
+      "event_id": "e1",
+      "summary": "User asks the agent to tidy up notes.md. No definition of 'tidy' is given in the message, the task description, or any constraint.",
+      "references": [
+        {"event_id": "e1", "pointer": "/content/text", "excerpt": "Can you tidy up notes.md?"},
+        {"pointer": "/task/description", "excerpt": "Tidy up notes.md."}
+      ]
+    },
+    {
+      "event_id": "e2",
+      "summary": "Agent calls read_file on notes.md before making any change.",
+      "references": [
+        {"event_id": "e2", "pointer": "/content/tool", "excerpt": "read_file"},
+        {"event_id": "e2", "pointer": "/content/args/path", "excerpt": "notes.md"}
+      ]
+    },
+    {
+      "event_id": "e3",
+      "summary": "read_file succeeds. The file contains three lines; the first and third are identical ('- buy milk').",
+      "references": [
+        {"event_id": "e3", "pointer": "/content/ok", "excerpt": "true"},
+        {"event_id": "e3", "pointer": "/content/output", "excerpt": "- buy milk\n- call bob\n- buy milk\n"}
+      ]
+    },
+    {
+      "event_id": "e4",
+      "summary": "Agent calls write_file on notes.md with the original content minus the repeated third line. The write is issued without any intervening confirmation from the user; tool policy is unknown, so this is recorded as an event, not a finding.",
+      "references": [
+        {"event_id": "e4", "pointer": "/content/tool", "excerpt": "write_file"},
+        {"event_id": "e4", "pointer": "/content/args/content", "excerpt": "- buy milk\n- call bob\n"},
+        {"pointer": "/tool_policy/status", "excerpt": "unknown"}
+      ]
+    },
+    {
+      "event_id": "e5",
+      "summary": "write_file succeeds and reports 22 bytes written. The content argument in e4 is 22 bytes long, so the call and its result are consistent with each other. This shows the write completed as requested; it does not show the on-disk content after the run.",
+      "references": [
+        {"event_id": "e5", "pointer": "/content/ok", "excerpt": "true"},
+        {"event_id": "e5", "pointer": "/content/output", "excerpt": "wrote 22 bytes to notes.md"}
+      ]
+    },
+    {
+      "event_id": "e6",
+      "summary": "Agent reports completion. This is the completion-keyword signal hit ('done'). The message accurately describes the change made in e4 but its claim that the file 'is tidy now' is unverified by any criterion or evaluator in the bundle.",
+      "references": [
+        {"event_id": "e6", "pointer": "/content/text", "excerpt": "Done: I removed the duplicate 'buy milk' line. notes.md is tidy now."},
+        {"pointer": "/provenance/synthetic", "excerpt": "true"}
+      ]
+    }
+  ],
+  "findings": [],
+  "earliest_divergence": {
+    "status": "unknown",
+    "statement": "No event shows the run departing from a path that would satisfy the task, because the bundle does not define what a satisfying result is. The task is too vague to judge against the trace.",
+    "references": [
+      {"pointer": "/task/description", "excerpt": "Tidy up notes.md."},
+      {"pointer": "/success_criteria/status", "excerpt": "unknown"}
+    ]
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Removing the duplicate 'buy milk' line is what the user meant by 'tidy up', and the run satisfied the request.",
+      "would_confirm": "A user reply or evaluator observation accepting the deduplicated file as the intended result, or success criteria that name duplicate removal.",
+      "would_refute": "A user reply or criteria indicating a different expectation, such as sorting, adding headers, reformatting, or preserving the repeated line.",
+      "references": [
+        {"event_id": "e1", "pointer": "/content/text", "excerpt": "Can you tidy up notes.md?"},
+        {"event_id": "e4", "pointer": "/content/args/content", "excerpt": "- buy milk\n- call bob\n"}
+      ]
+    },
+    {
+      "id": "H2",
+      "statement": "The on-disk notes.md after the run matches the content passed to write_file in e4.",
+      "would_confirm": "A post-run read of notes.md returning exactly '- buy milk\\n- call bob\\n'.",
+      "would_refute": "A post-run read returning different content, or evidence that the write_file tool does not persist to the path it reports.",
+      "references": [
+        {"event_id": "e4", "pointer": "/content/args/content", "excerpt": "- buy milk\n- call bob\n"},
+        {"event_id": "e5", "pointer": "/content/output", "excerpt": "wrote 22 bytes to notes.md"}
+      ]
+    },
+    {
+      "id": "H3",
+      "statement": "The repeated 'buy milk' line was intentional (for example, two separate purchases), and its removal lost information the user wanted.",
+      "would_confirm": "A user statement that the duplicate was deliberate, or a criterion requiring content preservation.",
+      "would_refute": "A user statement that the duplicate was an error, or acceptance of the deduplicated file.",
+      "references": [
+        {"event_id": "e3", "pointer": "/content/output", "excerpt": "- buy milk\n- call bob\n- buy milk\n"}
+      ]
+    }
+  ],
+  "missing_information": [
+    {"item": "Success criteria defining what 'tidy' means for notes.md.", "discriminates": "H1 versus H3; would also allow the outcome to move from unknown to success or failure."},
+    {"item": "Evaluator observations or a user reply after the agent's final message.", "discriminates": "H1 versus H3."},
+    {"item": "Post-run contents of notes.md, independent of the write_file result.", "discriminates": "H2."},
+    {"item": "Tool policy, in particular whether writing to the file without confirmation was permitted, required, or prohibited.", "discriminates": "Whether e4 would constitute an instruction_following finding; with policy unknown it is only a key event."}
+  ],
+  "remediation": {"status": "none", "statement": "No failure is established, so there is nothing to remediate. If success criteria or evaluator feedback become available, re-run the analysis against them."},
+  "regression_test": {
+    "status": "none",
+    "targets": [],
+    "preconditions": [],
+    "inputs": [],
+    "expected_behavior": [],
+    "assertions": []
+  }
+}

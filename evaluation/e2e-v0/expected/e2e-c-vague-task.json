@@ -1,0 +1,50 @@
+{
+  "fixture": "e2e-c-vague-task",
+  "note": "Expectation frozen on 2026-09-23 BEFORE any analysis session ran on this case, by the reviewing session (model-authored, provisional until human review). Not visible to the analysis sessions. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "unknown",
+      "basis": [
+        "agent_claim",
+        "none"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "success_criteria unknown, tool_policy unknown, evaluator unavailable",
+    "e3 shows three lines with a duplicated 'buy milk' line",
+    "e4/e5 wrote a two-line file successfully",
+    "e6 / final_output claims the file is tidy (completion keyword 'Done')"
+  ],
+  "permitted_interpretations": [
+    "nothing in the bundle defines what tidy means, so success cannot be judged",
+    "the agent's completion statement is a claim, not evidence of success",
+    "the tool activity is recorded and no tool failed"
+  ],
+  "prohibited_claims": [
+    "outcome success",
+    "outcome failure",
+    "removing the duplicate line was correct or incorrect (as established)",
+    "any finding: no event shows an observable failure and no criterion exists to miss",
+    "a tool or environment failure occurred"
+  ],
+  "categories": {
+    "expected_any": [],
+    "forbidden": [
+      "tool_selection",
+      "instruction_following",
+      "tool_execution",
+      "environment_provider",
+      "reasoning_calculation",
+      "evaluation_task_design",
+      "other_unknown"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "unknown"
+    ],
+    "event_ids": []
+  },
+  "regression_test": "none_expected"
+}

@@ -1,0 +1,88 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "syn-e2e-c-vague-task",
+  "task": {
+    "description": "Tidy up notes.md."
+  },
+  "success_criteria": {
+    "status": "unknown"
+  },
+  "tool_policy": {
+    "status": "unknown"
+  },
+  "events": [
+    {
+      "id": "e1",
+      "kind": "user_message",
+      "ts": "2026-09-22T09:00:01Z",
+      "content": {
+        "text": "Can you tidy up notes.md?"
+      }
+    },
+    {
+      "id": "e2",
+      "kind": "tool_call",
+      "ts": "2026-09-22T09:00:02Z",
+      "content": {
+        "call_id": "c1",
+        "tool": "read_file",
+        "args": {
+          "path": "notes.md"
+        }
+      }
+    },
+    {
+      "id": "e3",
+      "kind": "tool_result",
+      "ts": "2026-09-22T09:00:03Z",
+      "content": {
+        "call_id": "c1",
+        "ok": true,
+        "output": "- buy milk\n- call bob\n- buy milk\n"
+      }
+    },
+    {
+      "id": "e4",
+      "kind": "tool_call",
+      "ts": "2026-09-22T09:00:04Z",
+      "content": {
+        "call_id": "c2",
+        "tool": "write_file",
+        "args": {
+          "path": "notes.md",
+          "content": "- buy milk\n- call bob\n"
+        }
+      }
+    },
+    {
+      "id": "e5",
+      "kind": "tool_result",
+      "ts": "2026-09-22T09:00:05Z",
+      "content": {
+        "call_id": "c2",
+        "ok": true,
+        "output": "wrote 22 bytes to notes.md"
+      }
+    },
+    {
+      "id": "e6",
+      "kind": "assistant_message",
+      "ts": "2026-09-22T09:00:06Z",
+      "content": {
+        "text": "Done: I removed the duplicate 'buy milk' line. notes.md is tidy now."
+      }
+    }
+  ],
+  "final_output": {
+    "status": "available",
+    "text": "Done: I removed the duplicate 'buy milk' line. notes.md is tidy now."
+  },
+  "evaluator": {
+    "status": "unavailable"
+  },
+  "provenance": {
+    "source": "synthetic case authored by hand for the V0 release-validation end-to-end test (evaluation/e2e-v0)",
+    "synthetic": true,
+    "notes": "SYNTHETIC. No real agent, model, provider, or user produced these events."
+  }
+}

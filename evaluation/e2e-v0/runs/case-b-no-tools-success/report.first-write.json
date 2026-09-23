@@ -1,0 +1,75 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.0",
+  "run_id": "syn-e2e-b-no-tools-success",
+  "source": {
+    "snapshot": "snapshot.json",
+    "sha256": "4a414f6338f8dc8cf794ec5e2efcb08728218c6eabfc3a95b03275acbb704ec6"
+  },
+  "task": {
+    "description_ref": {"pointer": "/task/description"},
+    "criteria_status": "known",
+    "tool_policy_status": "optional",
+    "evidence_coverage": {
+      "events_total": 2,
+      "events_reviewed": 2,
+      "note": "Both events (one user_message, one assistant_message) were read in full from snapshot.json; no field was truncated. Signals considered: the only signal raised by prepare is no_tool_calls=true. The tool policy is 'optional' and its note says the calculator 'is not required', so the absence of tool calls is not a finding under the evidence contract and the taxonomy's 'Not failures' list; it is recorded as part of the key events instead. No failed tool results, error events, unpaired or repeated calls, completion keywords, or instruction-like text were detected. Provenance marks the bundle as SYNTHETIC, authored by hand for an end-to-end test; the analysis treats the events as recorded but no real agent or model behaviour is inferred from them."
+    }
+  },
+  "outcome": {
+    "status": "success",
+    "basis": "evaluator_observation",
+    "statement": "The evaluator observation o1 records verdict 'pass', stating that the answer 22.2 matches the expected value and has one decimal place. The verdict is independently corroborated by the trace: the final output literally contains '22.2 degrees Celsius', which satisfies criterion 1 ('The answer states 22.2'), and 22.2 is written to one decimal place, satisfying criterion 2. Evaluator verdicts can be wrong in general, but here the success criteria are known and the final output visibly meets both. As the analyst's own check, not bundle evidence: (72 - 32) * 5 / 9 = 22.22..., which rounds to 22.2 under the standard conversion formula.",
+    "references": [
+      {"pointer": "/evaluator/observations/0/verdict", "excerpt": "pass"},
+      {"pointer": "/evaluator/observations/0/text", "excerpt": "Answer 22.2 matches the expected value and has one decimal place."},
+      {"pointer": "/final_output/text", "excerpt": "72 degrees Fahrenheit is 22.2 degrees Celsius."},
+      {"event_id": "e2", "pointer": "/content/text", "excerpt": "22.2 degrees Celsius"},
+      {"pointer": "/success_criteria/criteria/0", "excerpt": "The answer states 22.2"},
+      {"pointer": "/success_criteria/criteria/1", "excerpt": "The result is given to one decimal place"},
+      {"pointer": "/task/description", "excerpt": "Convert 72 degrees Fahrenheit to Celsius and give the result to one decimal place."}
+    ]
+  },
+  "key_events": [
+    {
+      "event_id": "e1",
+      "summary": "User asks for 72 degrees Fahrenheit in Celsius to one decimal place. The request matches the task description.",
+      "references": [
+        {"event_id": "e1", "pointer": "/content/text", "excerpt": "What is 72 degrees Fahrenheit in Celsius, to one decimal place?"},
+        {"pointer": "/task/description", "excerpt": "Convert 72 degrees Fahrenheit to Celsius"}
+      ]
+    },
+    {
+      "event_id": "e2",
+      "summary": "Assistant answers directly with 22.2 degrees Celsius, one second after the request, without calling the optional calculator tool. This message is also the final output. No tool call was made in the run; the tool policy is optional and states the calculator is not required, so this is not a defect.",
+      "references": [
+        {"event_id": "e2", "pointer": "/content/text", "excerpt": "72 degrees Fahrenheit is 22.2 degrees Celsius."},
+        {"pointer": "/tool_policy/status", "excerpt": "optional"},
+        {"pointer": "/tool_policy/note", "excerpt": "A calculator tool is available; using it is not required."},
+        {"pointer": "/final_output/status", "excerpt": "available"}
+      ]
+    }
+  ],
+  "findings": [],
+  "earliest_divergence": {
+    "status": "unknown",
+    "statement": "No event shows the run departing from a path that satisfies the task. The single assistant message meets both success criteria, so there is no divergence to identify.",
+    "references": [
+      {"event_id": "e2", "pointer": "/content/text", "excerpt": "22.2 degrees Celsius"}
+    ]
+  },
+  "hypotheses": [],
+  "missing_information": [],
+  "remediation": {
+    "status": "none",
+    "statement": "No failure was established, so no remediation is proposed."
+  },
+  "regression_test": {
+    "status": "none",
+    "targets": [],
+    "preconditions": [],
+    "inputs": [],
+    "expected_behavior": [],
+    "assertions": []
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "fixture": "e2e-b-no-tools-success",
+  "note": "Expectation frozen on 2026-09-23 BEFORE any analysis session ran on this case, by the reviewing session (model-authored, provisional until human review). Not visible to the analysis sessions. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "success",
+      "basis": [
+        "evaluator_observation"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "no tool_call events; tool policy optional",
+    "e2 / final_output states 22.2 with one decimal place",
+    "evaluator o1 verdict pass"
+  ],
+  "permitted_interpretations": [
+    "not using the optional calculator is not a failure",
+    "the answer satisfies both stated criteria"
+  ],
+  "prohibited_claims": [
+    "not using the calculator was a failure or a finding",
+    "the answer is unverified because no tool was used (as a finding)",
+    "outcome unknown or failure",
+    "the evaluator or task is defective"
+  ],
+  "categories": {
+    "expected_any": [],
+    "forbidden": [
+      "tool_selection",
+      "instruction_following",
+      "tool_execution",
+      "environment_provider",
+      "reasoning_calculation",
+      "evaluation_task_design",
+      "other_unknown"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "unknown"
+    ],
+    "event_ids": []
+  },
+  "regression_test": "none_expected"
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "syn-e2e-b-no-tools-success",
+  "task": {
+    "description": "Convert 72 degrees Fahrenheit to Celsius and give the result to one decimal place."
+  },
+  "success_criteria": {
+    "status": "known",
+    "criteria": [
+      "The answer states 22.2",
+      "The result is given to one decimal place"
+    ]
+  },
+  "tool_policy": {
+    "status": "optional",
+    "tools": [
+      "calculator"
+    ],
+    "note": "A calculator tool is available; using it is not required."
+  },
+  "events": [
+    {
+      "id": "e1",
+      "kind": "user_message",
+      "ts": "2026-09-22T09:00:01Z",
+      "content": {
+        "text": "What is 72 degrees Fahrenheit in Celsius, to one decimal place?"
+      }
+    },
+    {
+      "id": "e2",
+      "kind": "assistant_message",
+      "ts": "2026-09-22T09:00:02Z",
+      "content": {
+        "text": "72 degrees Fahrenheit is 22.2 degrees Celsius."
+      }
+    }
+  ],
+  "final_output": {
+    "status": "available",
+    "text": "72 degrees Fahrenheit is 22.2 degrees Celsius."
+  },
+  "evaluator": {
+    "status": "available",
+    "observations": [
+      {
+        "id": "o1",
+        "verdict": "pass",
+        "text": "Answer 22.2 matches the expected value and has one decimal place."
+      }
+    ]
+  },
+  "provenance": {
+    "source": "synthetic case authored by hand for the V0 release-validation end-to-end test (evaluation/e2e-v0)",
+    "synthetic": true,
+    "notes": "SYNTHETIC. No real agent, model, provider, or user produced these events."
+  }
+}

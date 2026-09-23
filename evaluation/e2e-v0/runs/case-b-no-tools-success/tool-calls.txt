@@ -1,0 +1,35 @@
+01 Skill: {"skill": "agent-failure-analysis"}
+02 Bash: ls -R .claude/skills/agent-failure-analysis input work 2>/dev/null; cat input/bundle.json
+03 Bash: cat .claude/skills/agent-failure-analysis/references/evidence-contract.md .claude/skills/agent-failure-analysis/references/failure-taxonomy.md .claude/skills/agent-failure-analysis/references/report-schema.md
+04 Bash: mkdir -p work && python3 .claude/skills/agent-failure-analysis/scripts/trace_tools.py prepare input/bundle.json --out work && cat work/evidence.json
+    -> ERROR: mkdir in 'work' was blocked. For security, Claude Code may only create directories in the allowed working directories for this session: '/private/tmp/claude-501/-Users-leonardaarons-ditson/7cd9178d-746c-4fd5-95e4-ff6efe4874f8/scratchpad/afa-e2e/projects/case-b-no-tools-success'.
+05 Bash: python3 .claude/skills/agent-failure-analysis/scripts/trace_tools.py prepare input/bundle.json --out work && cat work/evidence.json
+    -> {   "ok": true,   "out": "work",   "sha256": "4a414f6338f8dc8cf794ec5e2efcb08728218c6eabfc3a95b03275acbb704ec6",   "run_id": "syn-e2e-b-no-tools-success",   "events": 2,   "warnings": [],   "files": [     "snapshot.json",     "snapshot.sha256",     "evidence.json"   ] } {   "evidence_version": "afa-evidence/1",   "skill_version": "0.1.0",   "source": {     "snapshot": "snapshot.json",     "sha256": "4a414f6338f8dc8cf
+06 Write: work/report.json  (4649 bytes)
+07 Bash: T=.claude/skills/agent-failure-analysis/scripts/trace_tools.py && python3 $T check-report work/report.json --snapshot work/snapshot.json --evidence work/evidence.json && python3 $T render work/report.json -o work/report.md && cat work/report.md
+    -> {   "ok": true,   "errors": [],   "warnings": [],   "notice": "Reference validity confirms that cited locations and excerpts exist in the snapshot. It does not confirm that any interpretation follows from them." } {"ok": true, "out": "work/report.md"} # Agent Run Analysis  **Run:** `syn-e2e-b-no-tools-success`   **Source snapshot:** `snapshot.json` sha256 `4a414f6338f8dc8cf794ec5e2efcb08728218c6eabfc3a95b03275acbb704
+08 Edit: work/report.json  old='        {"event_id": "e2", "pointer": "/content/text", "excerpt": "72 degrees Fahrenheit i' new='        {"event_id": "e2", "pointer": "/content/text", "excerpt": "72 degrees Fahrenheit is 22.2 degrees Celsius."},\n        {"event_id": "e1", "pointer": "/ts"'
+09 Bash: T=.claude/skills/agent-failure-analysis/scripts/trace_tools.py && python3 $T check-report work/report.json --snapshot work/snapshot.json --evidence work/evidence.json && python3 $T render work/report.json -o work/report.md && ls -la work
+    -> ERROR: Exit code 2 {   "ok": true,   "errors": [],   "warnings": [],   "notice": "Reference validity confirms that cited locations and excerpts exist in the snapshot. It does not confirm that any interpretation follows from them." } {   "ok": false,   "errors": [     "refusing to overwrite existing file (use --force): work/report.md"   ] }
+10 Bash: python3 .claude/skills/agent-failure-analysis/scripts/trace_tools.py render work/report.json -o work/report.md --force && ls -la work
+    -> {"ok": true, "out": "work/report.md"} total 48 drwxr-xr-x  7 leonardaarons-ditson  wheel   224 23 Sep 15:29 . drwxr-xr-x  8 leonardaarons-ditson  wheel   256 23 Sep 15:27 .. -rw-r--r--  1 leonardaarons-ditson  wheel  2982 23 Sep 15:27 evidence.json -rw-r--r--  1 leonardaarons-ditson  wheel  4811 23 Sep 15:29 report.json -rw-r--r--  1 leonardaarons-ditson  wheel  4058 23 Sep 15:29 report.md -rw-r--r--  1 leonardaarons
+
+FINAL ASSISTANT MESSAGE:
+**Outcome: success.** The run answered the Fahrenheit-to-Celsius task correctly, and the report passed the checker with no errors or warnings.
+
+Output files:
+
+- `work/report.json`
+- `work/report.md`
+
+Supporting files in the same directory are the frozen snapshot, its SHA-256 hash, and the extracted evidence packet.
+
+**What the run did.** The user asked for 72 degrees Fahrenheit in Celsius to one decimal place. The assistant replied in a single message with 22.2 degrees Celsius and made no tool calls. That message is also the final output.
+
+**Why the outcome is success.** The evaluator recorded a pass verdict, and that verdict is corroborated by the trace itself. The final output literally contains the value named in the first success criterion and is written to one decimal place as the second criterion requires. My own arithmetic check agrees, but the report labels that as the analyst's check rather than bundle evidence.
+
+**Findings.** None established. The only mechanical signal was the absence of tool calls. The tool policy is optional and its note says the calculator is not required, so the evidence contract and taxonomy both exclude this as a failure. It is recorded as a key event and dismissed explicitly in the coverage note.
+
+**Left as unknown.** Only the earliest evidenced divergence, because the run never departed from a path that satisfies the task, so there is nothing to identify. Hypotheses, missing information, remediation, and regression test are all empty or none, which the schema permits for a success outcome.
+
+**Caveat.** The bundle's provenance marks it as synthetic, authored by hand for an end-to-end test. The analysis treats the events as recorded and infers nothing about any real agent or model.

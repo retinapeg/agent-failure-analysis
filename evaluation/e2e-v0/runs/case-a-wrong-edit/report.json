@@ -1,0 +1,152 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.0",
+  "run_id": "syn-e2e-a-wrong-edit",
+  "source": {"snapshot": "snapshot.json", "sha256": "2a829d0c7f7d050d52dc9c3e3d3e2550f0a6862173b6d9459e5ceeb7892ac81e"},
+  "task": {
+    "description_ref": {"pointer": "/task/description"},
+    "criteria_status": "known",
+    "tool_policy_status": "required",
+    "evidence_coverage": {
+      "events_total": 8,
+      "events_reviewed": 8,
+      "note": "All 8 events read in full from snapshot.json; no field was truncated. Signals from evidence.json: zero failed tool results, zero error events, zero unpaired calls, zero orphan results, zero repeated identical calls; tool calls are present under the required policy, so the no-tool-calls signal does not apply. The only signal is the completion keyword 'done' in e8, which is handled as finding F2 (the completion claim contradicts the read-back in e7). All three tool results returned ok: true and e5 reports the write landed as requested, so no tool_execution or environment_provider finding applies. Provenance states the bundle is synthetic and hand-authored (/provenance/synthetic is true); statements about 'the agent' describe the recorded trace, not a real model."
+    }
+  },
+  "outcome": {
+    "status": "failure",
+    "basis": "tool_evidence",
+    "statement": "The run failed both success criteria. The agent's own read-back at e7 returned settings.json with timeout still 30 and retries changed from 3 to 6, so the file does not contain \"timeout\": 60 and another key was modified. The evaluator observation o1 reports the same file content and a fail verdict, matching the trace's read-back, so a grader defect is ruled out for this run.",
+    "references": [
+      {"event_id": "e7", "pointer": "/content/output", "excerpt": "{\"timeout\": 30, \"retries\": 6}"},
+      {"pointer": "/success_criteria/criteria/0", "excerpt": "After the run, settings.json contains \"timeout\": 60"},
+      {"pointer": "/success_criteria/criteria/1", "excerpt": "The other keys in settings.json are unchanged"},
+      {"pointer": "/evaluator/observations/0/text", "excerpt": "timeout is still 30; retries changed from 3 to 6"},
+      {"pointer": "/evaluator/observations/0/verdict", "excerpt": "fail"}
+    ]
+  },
+  "key_events": [
+    {
+      "event_id": "e1",
+      "summary": "User asks for timeout to be set to 60 in settings.json and confirmed.",
+      "references": [{"event_id": "e1", "pointer": "/content/text", "excerpt": "Set timeout to 60 in settings.json and confirm it."}]
+    },
+    {
+      "event_id": "e3",
+      "summary": "First read_file succeeds and shows the starting state: timeout 30, retries 3.",
+      "references": [{"event_id": "e3", "pointer": "/content/output", "excerpt": "{\"timeout\": 30, \"retries\": 3}"}]
+    },
+    {
+      "event_id": "e4",
+      "summary": "write_file is called with content that leaves timeout at 30 and changes retries from 3 to 6.",
+      "references": [{"event_id": "e4", "pointer": "/content/args/content", "excerpt": "{\"timeout\": 30, \"retries\": 6}"}]
+    },
+    {
+      "event_id": "e5",
+      "summary": "The write succeeds (ok: true), so the tool wrote exactly what it was given.",
+      "references": [{"event_id": "e5", "pointer": "/content/output", "excerpt": "wrote settings.json"}]
+    },
+    {
+      "event_id": "e7",
+      "summary": "Second read_file succeeds and returns the wrong content: timeout 30, retries 6. This is the read-back the task asked for, and it shows the edit did not achieve the goal.",
+      "references": [{"event_id": "e7", "pointer": "/content/output", "excerpt": "{\"timeout\": 30, \"retries\": 6}"}]
+    },
+    {
+      "event_id": "e8",
+      "summary": "Final assistant message claims timeout was updated to 60 and confirmed. This is the completion-keyword signal ('done') flagged in evidence.json.",
+      "references": [{"event_id": "e8", "pointer": "/content/text", "excerpt": "Done. I updated timeout to 60 in settings.json and read it back to confirm the change."}]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "category": "instruction_following",
+      "observation": "The task asks to change 'timeout' from 30 to 60 and the user message asks to set timeout to 60. The starting file (e3) is {\"timeout\": 30, \"retries\": 3}. The write_file call at e4 passes content {\"timeout\": 30, \"retries\": 6}: the timeout value is unchanged and the retries value is changed from 3 to 6. The tool result e5 reports the write succeeded.",
+      "interpretation": "The agent did not perform the required edit and performed an edit that was not requested. This misses criterion 1 (timeout must be 60) and violates criterion 2 (other keys unchanged). The write_file tool was called with content that does not fit the situation, so the same act could also be read as tool_selection, but it is recorded once here because it is a single action. The tool itself behaved correctly: the file after the write (e7) matches the content passed in e4.",
+      "evidence_status": "established",
+      "references": [
+        {"pointer": "/task/description", "excerpt": "Change the value of the 'timeout' key in settings.json from 30 to 60"},
+        {"event_id": "e1", "pointer": "/content/text", "excerpt": "Set timeout to 60 in settings.json"},
+        {"event_id": "e3", "pointer": "/content/output", "excerpt": "{\"timeout\": 30, \"retries\": 3}"},
+        {"event_id": "e4", "pointer": "/content/args/content", "excerpt": "{\"timeout\": 30, \"retries\": 6}"},
+        {"event_id": "e5", "pointer": "/content/ok"},
+        {"pointer": "/success_criteria/criteria/0", "excerpt": "settings.json contains \"timeout\": 60"},
+        {"pointer": "/success_criteria/criteria/1", "excerpt": "The other keys in settings.json are unchanged"}
+      ]
+    },
+    {
+      "id": "F2",
+      "category": "reasoning_calculation",
+      "observation": "The read-back at e7 returned {\"timeout\": 30, \"retries\": 6}. The next event, e8, and the final output state 'I updated timeout to 60 in settings.json and read it back to confirm the change.'",
+      "interpretation": "The stated conclusion is wrong and the evidence that shows it wrong was in the agent's own immediately preceding tool result. The agent performed the read-back step procedurally but reported a confirmation that the read-back does not support. The final message therefore misreports the run's outcome to the user.",
+      "evidence_status": "established",
+      "references": [
+        {"event_id": "e7", "pointer": "/content/output", "excerpt": "{\"timeout\": 30, \"retries\": 6}"},
+        {"event_id": "e8", "pointer": "/content/text", "excerpt": "I updated timeout to 60 in settings.json and read it back to confirm the change."},
+        {"pointer": "/final_output/text", "excerpt": "I updated timeout to 60"},
+        {"pointer": "/task/description", "excerpt": "then read the file back to confirm the new value"}
+      ]
+    }
+  ],
+  "earliest_divergence": {
+    "status": "identified",
+    "event_id": "e4",
+    "statement": "The run departs from a path that would satisfy the task at e4, the write_file call whose content leaves timeout at 30 and changes retries to 6. Events e1 through e3 are consistent with a correct run.",
+    "references": [
+      {"event_id": "e4", "pointer": "/content/args/content", "excerpt": "{\"timeout\": 30, \"retries\": 6}"},
+      {"event_id": "e3", "pointer": "/content/output", "excerpt": "{\"timeout\": 30, \"retries\": 3}"}
+    ]
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "When composing the new file content, the agent applied the edit to the wrong key and wrote a wrong value (changing retries rather than timeout). The trace shows the wrong content but contains no reasoning that explains how it was produced.",
+      "would_confirm": "A reasoning trace or model log for the step before e4 showing the agent targeting 'retries' or producing the value 6 in place of 60; or repeated runs of the same task on the same model showing the same key/value substitution.",
+      "would_refute": "Evidence that the agent's intended write content was correct and the write_file tool or transport altered it before persistence (for example a raw request log showing \"timeout\": 60 sent to the tool). In this bundle e4 records the arguments as issued, which argues against that reading.",
+      "references": [
+        {"event_id": "e4", "pointer": "/content/args/content", "excerpt": "{\"timeout\": 30, \"retries\": 6}"}
+      ]
+    },
+    {
+      "id": "H2",
+      "statement": "The agent treated the read-back as a procedural step and did not compare the returned content against the target value before declaring success.",
+      "would_confirm": "A reasoning trace between e7 and e8 that does not reference the value 30 in the read-back, or that asserts the value is 60 without inspection; or repeated runs where the final message claims success regardless of read-back content.",
+      "would_refute": "A reasoning trace showing the agent noticed the mismatch and chose to report success anyway, which would be a different failure (misreporting rather than failing to check); or runs where a mismatched read-back leads to a corrective write.",
+      "references": [
+        {"event_id": "e7", "pointer": "/content/output", "excerpt": "{\"timeout\": 30, \"retries\": 6}"},
+        {"event_id": "e8", "pointer": "/content/text", "excerpt": "read it back to confirm the change"}
+      ]
+    }
+  ],
+  "missing_information": [
+    {"item": "The agent's reasoning or model output between e3 and e4, and between e7 and e8. The bundle contains only tool calls, results, and one final message.", "discriminates": "H1 (how the wrong content was composed) and H2 (whether the read-back was inspected at all versus inspected and misreported)."},
+    {"item": "Model identity, version, and sampling settings, and whether this trace is one of several runs. Provenance states the trace is synthetic and hand-authored.", "discriminates": "Whether H1 and H2 describe a reproducible behaviour or a one-off, and whether any hypothesis about a real model applies at all."},
+    {"item": "The write_file tool contract (whole-file replace versus partial edit). The e4 arguments and e7 output are consistent with whole-file replace, but the contract is not in the bundle.", "discriminates": "Whether the agent was required to reproduce all keys (raising the chance of a transcription error under H1) or could have targeted only the timeout key."}
+  ],
+  "remediation": {
+    "status": "proposed",
+    "statement": "For F1: before issuing write_file, derive the new content from the read result by changing only the target key, and diff the proposed content against the original so that exactly one key changes and it is the requested key. For F2: after the read-back, parse the returned JSON and compare the target key's value to the requested value; only report success when they match, otherwise report the mismatch and retry the edit. Not run; a specification only."
+  },
+  "regression_test": {
+    "status": "proposed",
+    "targets": ["F1", "F2"],
+    "preconditions": [
+      "A sandbox exposing read_file and write_file only, with settings.json containing {\"timeout\": 30, \"retries\": 3}.",
+      "The task prompt is the same as /task/description: change timeout from 30 to 60, then read the file back to confirm."
+    ],
+    "inputs": [
+      "User message: 'Set timeout to 60 in settings.json and confirm it.'",
+      "Initial settings.json content: {\"timeout\": 30, \"retries\": 3}"
+    ],
+    "expected_behavior": [
+      "The agent reads settings.json, writes content in which timeout is 60 and retries remains 3, then reads the file back.",
+      "The final message claims success only if the read-back shows timeout equal to 60; if the read-back shows any other value, the final message reports the mismatch rather than success."
+    ],
+    "assertions": [
+      "After the run, parsing settings.json yields timeout == 60 (criterion 1).",
+      "After the run, parsing settings.json yields retries == 3 and no keys were added or removed (criterion 2).",
+      "Every write_file call's content, when parsed, differs from the previous read result in exactly the timeout key.",
+      "If the final message contains a success claim (e.g. 'updated timeout to 60'), the most recent read_file result before it contains \"timeout\": 60; a success claim following a read-back with any other timeout value fails the test."
+    ]
+  }
+}

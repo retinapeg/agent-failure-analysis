@@ -1,0 +1,56 @@
+{
+  "fixture": "e2e-a-wrong-edit",
+  "note": "Expectation frozen on 2026-09-23 BEFORE any analysis session ran on this case, by the reviewing session (model-authored, provisional until human review). Not visible to the analysis sessions. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "failure",
+      "basis": [
+        "evaluator_observation",
+        "tool_evidence"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "e3 read shows timeout 30, retries 3",
+    "e4 write_file content sets retries to 6 and leaves timeout at 30",
+    "e7 read-back shows timeout 30, retries 6",
+    "e8 / final_output claims timeout was updated to 60 and confirmed",
+    "evaluator o1 verdict fail: timeout still 30, retries changed"
+  ],
+  "permitted_interpretations": [
+    "the written content did not implement the requested change",
+    "the final statement contradicts the agent's own read-back at e7",
+    "the second criterion (other keys unchanged) is also missed because retries changed"
+  ],
+  "prohibited_claims": [
+    "write_file or read_file failed or malfunctioned",
+    "the file was not writable or the environment was at fault",
+    "the evaluator is wrong or the task is defective",
+    "an established cause for why retries was edited instead of timeout (only hypotheses)",
+    "outcome success or unknown"
+  ],
+  "categories": {
+    "expected_any": [
+      "reasoning_calculation",
+      "tool_selection"
+    ],
+    "forbidden": [
+      "tool_execution",
+      "environment_provider",
+      "evaluation_task_design",
+      "other_unknown"
+    ],
+    "partial_only": [
+      "instruction_following"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "identified"
+    ],
+    "event_ids": [
+      "e4"
+    ]
+  },
+  "regression_test": "expected"
+}

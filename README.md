@@ -117,6 +117,7 @@ Recorded in `evaluation/RESULTS.md`. In short:
 - Exploratory pilot, 12 runs on three fixtures: a plain prompt given only the schema produced one established unsupported diagnosis, three truthful non-failures filed in the findings field, two invalid references, and one schema error across six runs; the skill condition produced none of those on the same six. This is not a reliability estimate and does not establish that the skill beats plain prompting.
 - Release package: the 0.1.1 ZIP was installed in three isolated throwaway projects and exercised end to end by fresh Claude Code sessions (`claude-opus-5-5`) on three new cases whose expectations were frozen by hash beforehand. All three auto-invoked the skill, ran the packaged helper, passed the checker first time, and stayed within the expectations. The final ZIP differs from the tested one in a single documentation example; see `evaluation/e2e/RESULTS.md`.
 - Every semantic label is the implementing session's and is marked **unreviewed** until Leo reads the reports.
+- A second, concurrent validation pass by a different session independently reproduced the builds and check records, ran the committed 0.1.0 ZIP end to end on three further cases (`claude-fable-5-1`, `evaluation/e2e-v0/`), and recorded its own findings and disagreements in `evaluation/REVIEW-second-pass.md`. The final 0.1.1 ZIP has no end-to-end run of its own from either pass.
 
 ## Limitations
 

@@ -1,0 +1,37 @@
+01 Skill: {"skill": "agent-failure-analysis", "args": "input/bundle.json"}
+02 Bash: ls -R .claude/skills/agent-failure-analysis input work 2>&1 | head -50
+03 Read: .claude/skills/agent-failure-analysis/references/evidence-contract.md
+04 Read: .claude/skills/agent-failure-analysis/references/failure-taxonomy.md
+05 Read: .claude/skills/agent-failure-analysis/references/report-schema.md
+06 Read: .claude/skills/agent-failure-analysis/references/bundle-schema.md
+07 Bash: python3 .claude/skills/agent-failure-analysis/scripts/trace_tools.py prepare input/bundle.json --out work
+    -> {   "ok": true,   "out": "work",   "sha256": "2a829d0c7f7d050d52dc9c3e3d3e2550f0a6862173b6d9459e5ceeb7892ac81e",   "run_id": "syn-e2e-a-wrong-edit",   "events": 8,   "warnings": [],   "files": [     "snapshot.json",     "snapshot.sha256",     "evidence.json"   ] }
+08 Read: work/evidence.json
+09 Read: work/snapshot.json
+10 Write: work/report.json  (12490 bytes)
+11 Bash: python3 .claude/skills/agent-failure-analysis/scripts/trace_tools.py check-report work/report.json --snapshot work/snapshot.json --evidence work/evidence.json
+    -> {   "ok": true,   "errors": [],   "warnings": [],   "notice": "Reference validity confirms that cited locations and excerpts exist in the snapshot. It does not confirm that any interpretation follows from them." }
+12 Bash: python3 .claude/skills/agent-failure-analysis/scripts/trace_tools.py render work/report.json -o work/report.md && ls -la work && head -40 work/report.md
+    -> {"ok": true, "out": "work/report.md"} total 88 drwxr-xr-x  7 leonardaarons-ditson  wheel    224 23 Sep 15:25 . drwxr-xr-x  8 leonardaarons-ditson  wheel    256 23 Sep 15:23 .. -rw-r--r--  1 leonardaarons-ditson  wheel   5377 23 Sep 15:23 evidence.json -rw-r--r--  1 leonardaarons-ditson  wheel  12490 23 Sep 15:25 report.json -rw-r--r--  1 leonardaarons-ditson  wheel  10705 23 Sep 15:25 report.md -rw-r--r--  1 leonarda
+
+FINAL ASSISTANT MESSAGE:
+The run failed, and the trace shows exactly where. The report check passed with no errors and no warnings.
+
+Outputs:
+
+```
+work/report.json
+work/report.md
+```
+
+Supporting artifacts in the same directory are the byte-identical snapshot, its hash, and the extracted evidence packet.
+
+Findings:
+
+- **Outcome: failure, on tool evidence.** The agent's own read-back at event e7 returned the file with timeout still 30 and retries changed from 3 to 6. Both success criteria are missed. The evaluator's fail verdict reports the same content, so a grader defect is ruled out.
+- **F1, instruction_following, established.** The write at event e4 left the timeout key untouched and changed the retries key instead. The write tool behaved correctly and persisted exactly what it was given.
+- **F2, reasoning_calculation, established.** The final message claims timeout was updated to 60 and confirmed. The immediately preceding read-back contradicts that claim.
+- **Earliest divergence: identified at event e4.** Events e1 through e3 are consistent with a correct run.
+- **Cause remains unknown.** Why the wrong key was edited and why the read-back was not compared to the target are recorded as hypotheses H1 and H2, not findings. The trace has no reasoning between events to settle them, and the report lists the missing information that would.
+
+The bundle is marked synthetic and hand-authored in its provenance, so the findings describe the recorded trace rather than a real model. The remediation and regression test in the report are proposed specifications and were not run.
