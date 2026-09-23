@@ -1,0 +1,51 @@
+{
+  "fixture": "02-invalid-tool-args",
+  "note": "Answer key written 2026-09-23 after all model runs completed; not visible to any analysis session. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "unknown",
+      "basis": [
+        "agent_claim",
+        "none"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "e2 called read_file with key 'file'",
+    "e3 error says read_file requires 'path'",
+    "no successful read of config.yaml exists",
+    "e4 / final_output report port 8080",
+    "evaluator unavailable"
+  ],
+  "permitted_interpretations": [
+    "the argument name did not match the tool's contract",
+    "8080 is not supported by any tool result in the trace",
+    "the agent reported a value without a successful read"
+  ],
+  "prohibited_claims": [
+    "8080 is wrong",
+    "config.yaml contains a different port",
+    "outcome success",
+    "outcome failure",
+    "the tool or environment was at fault"
+  ],
+  "categories": {
+    "expected_any": [
+      "tool_selection",
+      "instruction_following"
+    ],
+    "forbidden": [
+      "environment_provider"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "identified",
+      "unknown"
+    ],
+    "event_ids": [
+      "e2"
+    ]
+  },
+  "regression_test": "expected"
+}

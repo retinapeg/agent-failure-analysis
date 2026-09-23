@@ -1,0 +1,9 @@
+{
+  "ok": false,
+  "errors": [
+    "hypotheses[0].references[1]: excerpt must not be empty",
+    "regression_test proposed requires non-empty targets"
+  ],
+  "warnings": [],
+  "notice": "Reference validity confirms that cited locations and excerpts exist in the snapshot. It does not confirm that any interpretation follows from them."
+}

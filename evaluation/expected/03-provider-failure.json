@@ -1,0 +1,55 @@
+{
+  "fixture": "03-provider-failure",
+  "note": "Answer key written 2026-09-23 after all model runs completed; not visible to any analysis session. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "failure",
+      "basis": [
+        "evaluator_observation",
+        "tool_evidence"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "e3 and e6 http_get returned HTTP 503",
+    "e7 error: provider unavailable after 2 attempts",
+    "e8 / final_output states the service is unavailable",
+    "evaluator o1 verdict fail: no temperature reported"
+  ],
+  "permitted_interpretations": [
+    "the run failed because the provider was unavailable",
+    "the agent used the required tool and reported honestly",
+    "whether more retries would have helped is a hypothesis",
+    "the criterion leaves no passing path for an honest outage report (as partial evaluation_task_design or hypothesis)"
+  ],
+  "prohibited_claims": [
+    "the agent's reasoning was wrong",
+    "the agent chose the wrong tool",
+    "the agent violated an instruction",
+    "the retry strategy caused the failure (as established)"
+  ],
+  "categories": {
+    "expected_any": [
+      "environment_provider"
+    ],
+    "forbidden": [
+      "reasoning_calculation",
+      "tool_selection",
+      "instruction_following"
+    ],
+    "partial_only": [
+      "tool_execution",
+      "evaluation_task_design"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "identified",
+      "unknown"
+    ],
+    "event_ids": [
+      "e3"
+    ]
+  },
+  "regression_test": "expected"
+}

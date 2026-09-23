@@ -1,0 +1,68 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.0",
+  "run_id": "syn-05-success-no-tools",
+  "source": {"snapshot": "snapshot.json", "sha256": "eeffdbb3390db06e630e33674c8e1553aa897a0c8a1e6e42979b4bfce1a5e3fd"},
+  "task": {
+    "description_ref": {"pointer": "/task/description", "excerpt": "In two sentences, explain the difference between a Python list and a Python tuple."},
+    "criteria_status": "known",
+    "tool_policy_status": "optional",
+    "evidence_coverage": {
+      "events_total": 2,
+      "events_reviewed": 2,
+      "note": "Both events (e1 user_message, e2 assistant_message) were read in full from snapshot.json; no field was truncated. Validation produced no warnings. Signals: the only signal raised by prepare is no_tool_calls=true under tool_policy status 'optional'; per the evidence contract, absent tool use under an optional policy is not a failure and is dismissed here as a non-finding (recorded as a key event note). failed_tool_results, error_events, unpaired_tool_calls, orphan_tool_results, repeated_identical_calls, assistant_completion_keywords and instruction_like_text_in_evidence were all empty; signal_event_ids is empty. Provenance states the bundle is SYNTHETIC and hand-authored, so nothing here describes a real agent, model, or user."
+    }
+  },
+  "outcome": {
+    "status": "success",
+    "basis": "evaluator_observation",
+    "statement": "The evaluator observation o1 carries verdict 'pass' and states that the response is two sentences and names mutability as the difference. This is the evaluator's view and could in principle be wrong, but the final output text is consistent with it on direct reading: it contains exactly two sentences (split at the two full stops), the first sentence states that a list is mutable and a tuple is immutable, and the second is framed as a consequence ('therefore') of that difference. Both known success criteria are therefore met on the evidence available.",
+    "references": [
+      {"pointer": "/evaluator/observations/0/verdict", "excerpt": "pass"},
+      {"pointer": "/evaluator/observations/0/text", "excerpt": "Two sentences; mutability is named as the difference."},
+      {"pointer": "/success_criteria/criteria/0", "excerpt": "Mentions mutability as the key difference"},
+      {"pointer": "/success_criteria/criteria/1", "excerpt": "At most two sentences"},
+      {"pointer": "/final_output/text", "excerpt": "A list is mutable, so you can add, remove, or change its elements after creation, while a tuple is immutable and fixed once created. Tuples are therefore hashable when their contents are, which lets them serve as dictionary keys or set members, whereas lists cannot."}
+    ]
+  },
+  "key_events": [
+    {
+      "event_id": "e1",
+      "summary": "User asks, in two sentences, for the difference between a list and a tuple in Python. This matches the task description in scope and length constraint.",
+      "references": [
+        {"event_id": "e1", "pointer": "/content/text", "excerpt": "In two sentences, what's the difference between a list and a tuple in Python?"},
+        {"pointer": "/task/description", "excerpt": "In two sentences, explain the difference between a Python list and a Python tuple."}
+      ]
+    },
+    {
+      "event_id": "e2",
+      "summary": "Assistant answers directly with a two-sentence response that leads with mutability (list mutable, tuple immutable) and derives hashability from it. No tool was called before or after this message; tool policy is 'optional' with a note that using the Python interpreter is not required, so the absence of tool calls is not a finding. The final_output text is identical to this message.",
+      "references": [
+        {"event_id": "e2", "pointer": "/content/text", "excerpt": "A list is mutable, so you can add, remove, or change its elements after creation, while a tuple is immutable and fixed once created."},
+        {"event_id": "e2", "pointer": "/content/text", "excerpt": "Tuples are therefore hashable when their contents are, which lets them serve as dictionary keys or set members, whereas lists cannot."},
+        {"pointer": "/tool_policy/status", "excerpt": "optional"},
+        {"pointer": "/tool_policy/note", "excerpt": "A Python interpreter is available; using it is not required."},
+        {"pointer": "/final_output/text", "excerpt": "A list is mutable, so you can add, remove, or change its elements after creation, while a tuple is immutable and fixed once created. Tuples are therefore hashable when their contents are, which lets them serve as dictionary keys or set members, whereas lists cannot."}
+      ]
+    }
+  ],
+  "findings": [],
+  "earliest_divergence": {
+    "status": "unknown",
+    "statement": "No event shows the run departing from a path that satisfies the task; the run is assessed as successful, so there is no divergence to identify. 'unknown' here records the absence of an evidenced divergence, not uncertainty about one.",
+    "references": [
+      {"event_id": "e2", "pointer": "/content/text", "excerpt": "A list is mutable"}
+    ]
+  },
+  "hypotheses": [],
+  "missing_information": [],
+  "remediation": {"status": "none", "statement": "No failure was established; no remediation is proposed."},
+  "regression_test": {
+    "status": "none",
+    "targets": [],
+    "preconditions": [],
+    "inputs": [],
+    "expected_behavior": [],
+    "assertions": []
+  }
+}

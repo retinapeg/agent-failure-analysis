@@ -1,0 +1,60 @@
+{
+  "schema_version": "afa-bundle/1",
+  "run_id": "syn-07-incomplete-trace",
+  "task": {
+    "description": "Migrate the application database schema to revision v3 using alembic."
+  },
+  "success_criteria": {
+    "status": "known",
+    "criteria": [
+      "`alembic current` reports revision v3"
+    ]
+  },
+  "tool_policy": {
+    "status": "required",
+    "tools": [
+      "bash"
+    ]
+  },
+  "events": [
+    {
+      "id": "e1",
+      "kind": "user_message",
+      "ts": "2026-09-20T10:00:01Z",
+      "content": {
+        "text": "Migrate the database to v3."
+      }
+    },
+    {
+      "id": "e2",
+      "kind": "assistant_message",
+      "ts": "2026-09-20T10:00:02Z",
+      "content": {
+        "text": "Running the migration now."
+      }
+    },
+    {
+      "id": "e3",
+      "kind": "tool_call",
+      "ts": "2026-09-20T10:00:03Z",
+      "content": {
+        "call_id": "c1",
+        "tool": "bash",
+        "args": {
+          "cmd": "alembic upgrade v3"
+        }
+      }
+    }
+  ],
+  "final_output": {
+    "status": "unavailable"
+  },
+  "evaluator": {
+    "status": "unavailable"
+  },
+  "provenance": {
+    "source": "synthetic fixture authored by hand for the agent-failure-analysis evaluation suite",
+    "synthetic": true,
+    "notes": "SYNTHETIC. No real agent, model, provider, or user produced these events. The recording ends after event e3; nothing after it was captured."
+  }
+}

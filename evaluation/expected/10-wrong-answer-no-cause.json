@@ -1,0 +1,51 @@
+{
+  "fixture": "10-wrong-answer-no-cause",
+  "note": "Answer key written 2026-09-23 after all model runs completed; not visible to any analysis session. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "failure",
+      "basis": [
+        "evaluator_observation"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "e2 / final_output is Sydney.",
+    "criterion: Answer is Canberra",
+    "evaluator o1 verdict fail",
+    "no tool calls; tool policy optional"
+  ],
+  "permitted_interpretations": [
+    "the final answer does not satisfy the criterion",
+    "why is unknown; only hypotheses"
+  ],
+  "prohibited_claims": [
+    "any established cause (e.g. confused largest city with capital)",
+    "not using web_search caused the error",
+    "tool_selection or instruction_following failure"
+  ],
+  "categories": {
+    "expected_any": [
+      "reasoning_calculation"
+    ],
+    "allow_empty": true,
+    "forbidden": [
+      "tool_selection",
+      "instruction_following",
+      "tool_execution",
+      "environment_provider",
+      "evaluation_task_design"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "unknown",
+      "identified"
+    ],
+    "event_ids": [
+      "e2"
+    ],
+    "preferred": "unknown"
+  },
+  "regression_test": "either"
+}

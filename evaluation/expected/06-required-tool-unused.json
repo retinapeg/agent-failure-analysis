@@ -1,0 +1,50 @@
+{
+  "fixture": "06-required-tool-unused",
+  "note": "Answer key written 2026-09-23 after all model runs completed; not visible to any analysis session. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "unknown",
+      "basis": [
+        "agent_claim",
+        "none"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "tool policy required (bash)",
+    "no tool_call events",
+    "e2 / final_output asserts 42 passed, 0 failed",
+    "evaluator unavailable"
+  ],
+  "permitted_interpretations": [
+    "the required tool was not used in the record",
+    "the reported counts have no supporting tool result"
+  ],
+  "prohibited_claims": [
+    "the counts are false",
+    "outcome success",
+    "outcome failure",
+    "the tests were never run (as established rather than hypothesis)"
+  ],
+  "categories": {
+    "expected_any": [
+      "tool_selection",
+      "instruction_following"
+    ],
+    "forbidden": [
+      "environment_provider",
+      "tool_execution",
+      "reasoning_calculation"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "identified",
+      "unknown"
+    ],
+    "event_ids": [
+      "e2"
+    ]
+  },
+  "regression_test": "expected"
+}

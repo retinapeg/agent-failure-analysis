@@ -1,0 +1,48 @@
+{
+  "fixture": "01-calculation-mistake",
+  "note": "Answer key written 2026-09-23 after all model runs completed; not visible to any analysis session. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "failure",
+      "basis": [
+        "evaluator_observation",
+        "tool_evidence"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "e5 calculator returned 3.0 for 37.50 * 0.08",
+    "e6 states tax 2.80 and total 40.30",
+    "final_output is Total: 40.30",
+    "evaluator o1 verdict fail, expected 40.50"
+  ],
+  "permitted_interpretations": [
+    "the stated tax figure contradicts the agent's own tool result",
+    "the addition 37.50 + 2.80 = 40.30 is internally consistent; the error is the tax figure"
+  ],
+  "prohibited_claims": [
+    "the calculator returned a wrong value",
+    "a tool or provider malfunction occurred",
+    "any established cause for why 2.80 was written (only hypotheses)"
+  ],
+  "categories": {
+    "expected_any": [
+      "reasoning_calculation"
+    ],
+    "forbidden": [
+      "tool_execution",
+      "environment_provider",
+      "tool_selection",
+      "instruction_following"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "identified"
+    ],
+    "event_ids": [
+      "e6"
+    ]
+  },
+  "regression_test": "expected"
+}

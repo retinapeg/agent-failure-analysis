@@ -1,0 +1,234 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.0",
+  "run_id": "syn-05-success-no-tools",
+  "source": {
+    "snapshot": "snapshot.json",
+    "sha256": "eeffdbb3390db06e630e33674c8e1553aa897a0c8a1e6e42979b4bfce1a5e3fd"
+  },
+  "task": {
+    "description_ref": {
+      "pointer": "/task/description"
+    },
+    "criteria_status": "known",
+    "tool_policy_status": "optional",
+    "evidence_coverage": {
+      "events_total": 2,
+      "events_reviewed": 2,
+      "note": "Both events (one user message, one assistant message) were read in full, together with the task, success criteria, tool policy, final_output, evaluator observation and provenance. No tool_call or tool_result events exist in the run."
+    }
+  },
+  "outcome": {
+    "status": "success",
+    "basis": "evaluator_observation",
+    "statement": "The run succeeded. The evaluator recorded a single 'pass' observation stating that the answer is two sentences and names mutability as the difference. An independent re-check of the transcript agrees: the assistant message e2 (identical to final_output.text) splits into exactly two sentences on terminal punctuation, and its first sentence states that a list is mutable while a tuple is immutable, satisfying both known success criteria. The optional 'python' tool was not used, which the tool policy permits.",
+    "references": [
+      {
+        "pointer": "/evaluator/observations/0/verdict",
+        "excerpt": "pass"
+      },
+      {
+        "pointer": "/evaluator/observations/0/text",
+        "excerpt": "Two sentences; mutability is named as the difference."
+      },
+      {
+        "event_id": "e2",
+        "pointer": "/content/text",
+        "excerpt": "A list is mutable, so you can add, remove, or change its elements after creation, while a tuple is immutable and fixed once created."
+      },
+      {
+        "pointer": "/success_criteria/criteria/0",
+        "excerpt": "Mentions mutability as the key difference"
+      },
+      {
+        "pointer": "/success_criteria/criteria/1",
+        "excerpt": "At most two sentences"
+      },
+      {
+        "pointer": "/tool_policy/note",
+        "excerpt": "using it is not required"
+      }
+    ]
+  },
+  "key_events": [
+    {
+      "event_id": "e1",
+      "summary": "User asks, in two sentences, for the difference between a Python list and tuple. The wording paraphrases /task/description ('what's the difference' vs 'explain the difference') but preserves the two-sentence constraint and the subject.",
+      "references": [
+        {
+          "event_id": "e1",
+          "pointer": "/content/text",
+          "excerpt": "In two sentences, what's the difference between a list and a tuple in Python?"
+        },
+        {
+          "pointer": "/task/description",
+          "excerpt": "In two sentences, explain the difference between a Python list and a Python tuple."
+        }
+      ]
+    },
+    {
+      "event_id": "e2",
+      "summary": "Assistant answers directly, one second later, without invoking the optional python tool. Sentence 1 states the mutability difference; sentence 2 adds the consequence that tuples (with hashable contents) are hashable and usable as dict keys or set members while lists are not. Both statements are factually correct for CPython. The text is byte-identical to final_output.text.",
+      "references": [
+        {
+          "event_id": "e2",
+          "pointer": "/content/text",
+          "excerpt": "Tuples are therefore hashable when their contents are, which lets them serve as dictionary keys or set members, whereas lists cannot."
+        },
+        {
+          "pointer": "/final_output/status",
+          "excerpt": "available"
+        },
+        {
+          "event_id": "e2",
+          "pointer": "/ts",
+          "excerpt": "2026-09-20T10:00:02Z"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "category": "other_unknown",
+      "observation": "No failure is present. The single assistant turn satisfies both success criteria (mutability named; exactly two sentences), the evaluator verdict is 'pass', and the final output equals the last assistant message. No tools were called, and the tool policy marks the python tool as optional, so the absence of tool use is not a policy violation.",
+      "interpretation": "This is a clean success baseline (a 'no-tools success' fixture). No taxonomy failure category applies; 'other_unknown' is used only because the schema requires a category and none of the failure slugs fit a non-failure. The evaluator's claim was independently verified against the transcript rather than accepted on trust.",
+      "evidence_status": "established",
+      "references": [
+        {
+          "pointer": "/evaluator/observations/0/verdict",
+          "excerpt": "pass"
+        },
+        {
+          "event_id": "e2",
+          "pointer": "/content/text",
+          "excerpt": "while a tuple is immutable and fixed once created."
+        },
+        {
+          "pointer": "/tool_policy/status",
+          "excerpt": "optional"
+        },
+        {
+          "pointer": "/final_output/text",
+          "excerpt": "A list is mutable"
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "category": "evaluation_task_design",
+      "observation": "The success criteria and the evaluator observation check only form (sentence count) and presence of the keyword concept (mutability). Neither the criteria nor the evaluator text records any check of the factual accuracy of the answer's second sentence (hashability / dict-key claim), and the evaluator does not state how sentences were counted.",
+      "interpretation": "The evaluation is sufficient for this run because the second sentence is correct on manual review, but the rubric would also pass a two-sentence answer that names mutability and then states something false. This is a coverage gap in the task design rather than an agent failure; it is flagged as partial because the fixture is synthetic and the evaluator may have applied unstated checks.",
+      "evidence_status": "partial",
+      "references": [
+        {
+          "pointer": "/success_criteria/criteria/0",
+          "excerpt": "Mentions mutability as the key difference"
+        },
+        {
+          "pointer": "/evaluator/observations/0/text",
+          "excerpt": "Two sentences; mutability is named as the difference."
+        },
+        {
+          "pointer": "/provenance/notes",
+          "excerpt": "SYNTHETIC. No real agent, model, provider, or user produced these events."
+        }
+      ]
+    }
+  ],
+  "earliest_divergence": {
+    "status": "unknown",
+    "statement": "No divergence from expected behaviour was found at any event; the run is a success, so there is no earliest divergence to identify. 'unknown' is used because the schema offers no 'none' value, not because evidence is lacking.",
+    "references": [
+      {
+        "pointer": "/evaluator/observations/0/verdict",
+        "excerpt": "pass"
+      },
+      {
+        "event_id": "e2",
+        "pointer": "/content/text",
+        "excerpt": "A list is mutable"
+      }
+    ]
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "The agent deliberately skipped the optional python tool because the question is conceptual and needs no execution, rather than because the tool was unavailable or the agent was unaware of it.",
+      "would_confirm": "A reasoning trace, system prompt, or tool manifest in the run showing the python tool was advertised to the agent and the agent chose a direct answer.",
+      "would_refute": "Evidence that the tool was not actually exposed in the agent's context (e.g. an empty tools list in the request), which would mean the 'optional' policy was never exercisable.",
+      "references": [
+        {
+          "pointer": "/tool_policy/tools/0",
+          "excerpt": "python"
+        },
+        {
+          "pointer": "/tool_policy/note",
+          "excerpt": "A Python interpreter is available; using it is not required."
+        }
+      ]
+    },
+    {
+      "id": "H2",
+      "statement": "The evaluator's sentence count used a simple terminal-punctuation split, which agrees with the manual count here but could miscount answers containing abbreviations, code, or decimal numbers.",
+      "would_confirm": "The evaluator's rubric or code showing its sentence-segmentation method.",
+      "would_refute": "Evaluator documentation showing a robust segmenter or a human judgement was used.",
+      "references": [
+        {
+          "pointer": "/evaluator/observations/0/text",
+          "excerpt": "Two sentences"
+        }
+      ]
+    }
+  ],
+  "missing_information": [
+    {
+      "item": "Agent reasoning trace or system prompt / tool manifest presented to the agent",
+      "discriminates": "Whether not using the python tool was a choice (H1 confirmed) or an artefact of the tool not being exposed (H1 refuted)."
+    },
+    {
+      "item": "Evaluator rubric or scoring code, including sentence-segmentation method and whether factual accuracy was assessed",
+      "discriminates": "Whether F2's coverage gap is real or the evaluator applied unstated accuracy checks; also resolves H2."
+    },
+    {
+      "item": "Model, provider and sampling parameters (absent because the fixture is synthetic)",
+      "discriminates": "Whether this success generalises to a real deployment or is only a hand-authored baseline."
+    },
+    {
+      "item": "Multiple samples of the same prompt",
+      "discriminates": "Whether the two-sentence constraint is reliably honoured or this single pass was luck."
+    }
+  ],
+  "remediation": {
+    "status": "none",
+    "statement": "No agent-side remediation is needed; the run met all known criteria. Optionally, the task design (F2) could add a factual-accuracy criterion so the rubric cannot be satisfied by a correct-length answer containing a false second claim."
+  },
+  "regression_test": {
+    "status": "proposed",
+    "targets": [
+      "F1",
+      "F2"
+    ],
+    "preconditions": [
+      "Agent is configured with the python tool available but marked optional (tool_policy.status = optional).",
+      "Evaluator applies the two known criteria plus a factual-accuracy check for any additional claims (addresses F2)."
+    ],
+    "inputs": [
+      "User message identical to e1: 'In two sentences, what's the difference between a list and a tuple in Python?'",
+      "Run the prompt N>=5 times to check stability."
+    ],
+    "expected_behavior": [
+      "Agent replies with at most two sentences.",
+      "Reply states that lists are mutable and tuples are immutable (or equivalent wording containing 'mutable'/'immutable').",
+      "Agent may or may not call the python tool; if it does, the call must succeed and the final answer must still meet the length constraint.",
+      "Any extra claim (e.g. hashability, dict keys) must be factually correct."
+    ],
+    "assertions": [
+      "len(split_sentences(final_output.text)) <= 2 for every sample.",
+      "re.search(r'\\b(im)?mutab', final_output.text, re.I) is not None for every sample.",
+      "Every tool_call event, if any, has a matching tool_result with no error.",
+      "final_output.text == last assistant_message.content.text.",
+      "Evaluator verdict == 'pass' for every sample, and no sample contains a claim contradicted by the Python language reference."
+    ]
+  }
+}

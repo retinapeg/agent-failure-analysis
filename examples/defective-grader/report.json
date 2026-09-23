@@ -1,0 +1,134 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.0",
+  "run_id": "syn-08-defective-grader",
+  "source": {"snapshot": "snapshot.json", "sha256": "5dc5a9c05d546f9f7cec2ea7f9c6e10ece0004e0afda5b5c82bac2451892cc39"},
+  "task": {
+    "description_ref": {"pointer": "/task/description"},
+    "criteria_status": "known",
+    "tool_policy_status": "optional",
+    "evidence_coverage": {
+      "events_total": 4,
+      "events_reviewed": 4,
+      "note": "All four events (e1-e4) were read in full from snapshot.json; no field was truncated. prepare emitted no validation warnings and no signals: no failed tool results, no error events, no unpaired calls, no repeated calls, no completion keywords, no instruction-like text, and no_tool_calls is false under an optional policy. The bundle is marked synthetic in provenance."
+    }
+  },
+  "outcome": {
+    "status": "success",
+    "basis": "tool_evidence",
+    "statement": "The known success criterion is that the answer is the list of primes below 10 (2, 3, 5, 7) with formatting not specified. The python tool result (e3) printed [2, 3, 5, 7], and the final output states 'The primes below 10 are [2, 3, 5, 7].', which contains exactly those four numbers. The criterion is met. The evaluator recorded a fail verdict (o1), but that verdict rests on an exact-match rule (o2) that requires a specific formatting the criterion explicitly leaves unspecified; the evaluator's view is contradicted by the criterion in the bundle and is treated as a grader defect (see F1).",
+    "references": [
+      {"pointer": "/success_criteria/criteria/0", "excerpt": "The answer is the list of primes below 10: 2, 3, 5, 7 (formatting not specified)"},
+      {"event_id": "e3", "pointer": "/content/output", "excerpt": "[2, 3, 5, 7]\n"},
+      {"pointer": "/final_output/text", "excerpt": "The primes below 10 are [2, 3, 5, 7]."},
+      {"pointer": "/evaluator/observations/0/verdict", "excerpt": "fail"},
+      {"pointer": "/evaluator/observations/1/text", "excerpt": "final_output.strip() == '[2,3,5,7]'"}
+    ]
+  },
+  "key_events": [
+    {
+      "event_id": "e1",
+      "summary": "User asks the agent to list the prime numbers below 10; no output format is requested.",
+      "references": [{"event_id": "e1", "pointer": "/content/text", "excerpt": "List the prime numbers below 10."}]
+    },
+    {
+      "event_id": "e2",
+      "summary": "Agent calls the python tool (permitted under the optional policy) with a list comprehension that filters range(2, 10) by trial division.",
+      "references": [
+        {"event_id": "e2", "pointer": "/content/args/code", "excerpt": "print([n for n in range(2, 10) if all(n % d for d in range(2, n))])"},
+        {"pointer": "/tool_policy/status", "excerpt": "optional"}
+      ]
+    },
+    {
+      "event_id": "e3",
+      "summary": "Tool result returns ok with output [2, 3, 5, 7]; the single tool call is paired and succeeded.",
+      "references": [
+        {"event_id": "e3", "pointer": "/content/ok"},
+        {"event_id": "e3", "pointer": "/content/output", "excerpt": "[2, 3, 5, 7]\n"}
+      ]
+    },
+    {
+      "event_id": "e4",
+      "summary": "Agent answers in a sentence that embeds the computed list; this text is identical to final_output.",
+      "references": [
+        {"event_id": "e4", "pointer": "/content/text", "excerpt": "The primes below 10 are [2, 3, 5, 7]."},
+        {"pointer": "/final_output/text", "excerpt": "The primes below 10 are [2, 3, 5, 7]."}
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "category": "evaluation_task_design",
+      "observation": "The success criterion reads 'The answer is the list of primes below 10: 2, 3, 5, 7 (formatting not specified)'. The task description reads 'Return the list of prime numbers below 10.' and contains no formatting requirement. Evaluator observation o1 has verdict fail and reads \"Exact-match grader: expected '[2,3,5,7]' but final output was 'The primes below 10 are [2, 3, 5, 7].'\". Observation o2 records the configured rule as \"final_output.strip() == '[2,3,5,7]'\". The final output text is 'The primes below 10 are [2, 3, 5, 7].', which contains the numbers 2, 3, 5, 7 in order.",
+      "interpretation": "The evaluator is defective relative to the task frame supplied in the bundle: it enforces an exact string match on a formatting the success criterion explicitly leaves unspecified and the task never requested. The fail verdict therefore reflects a grader defect, not an agent defect. The agent's answer satisfies the criterion as written. No finding is raised against the agent.",
+      "evidence_status": "established",
+      "references": [
+        {"pointer": "/task/description", "excerpt": "Return the list of prime numbers below 10."},
+        {"pointer": "/success_criteria/criteria/0", "excerpt": "(formatting not specified)"},
+        {"pointer": "/evaluator/observations/0/text", "excerpt": "Exact-match grader: expected '[2,3,5,7]' but final output was 'The primes below 10 are [2, 3, 5, 7].'"},
+        {"pointer": "/evaluator/observations/0/verdict", "excerpt": "fail"},
+        {"pointer": "/evaluator/observations/1/text", "excerpt": "Grader rule as configured: final_output.strip() == '[2,3,5,7]'"},
+        {"pointer": "/final_output/text", "excerpt": "The primes below 10 are [2, 3, 5, 7]."}
+      ]
+    }
+  ],
+  "earliest_divergence": {
+    "status": "unknown",
+    "statement": "No event shows the agent departing from a path that satisfies the task: the user message carries no format requirement, the tool call computes the correct set, the tool result confirms it, and the final message reports it. The only departure in the bundle is the evaluator's verdict, which is not an agent event. There is therefore no evidenced agent divergence to identify.",
+    "references": [
+      {"event_id": "e1", "pointer": "/content/text", "excerpt": "List the prime numbers below 10."},
+      {"event_id": "e4", "pointer": "/content/text", "excerpt": "The primes below 10 are [2, 3, 5, 7]."}
+    ]
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "The grader was configured for a bare-list output format (the string '[2,3,5,7]') that was never communicated to the agent in the task description or user message, so the exact-match rule is misaligned with the task as posed.",
+      "would_confirm": "The grader configuration or benchmark definition outside this bundle shows the expected string was set without any corresponding format instruction in the prompt delivered to the agent, or shows that the bundle's task description and user message are the complete prompt.",
+      "would_refute": "The prompt actually delivered to the agent (beyond what the bundle records) contained an instruction to output exactly '[2,3,5,7]' with no other text, in which case the agent's sentence-form answer would be an instruction_following issue rather than a grader defect.",
+      "references": [
+        {"pointer": "/task/description", "excerpt": "Return the list of prime numbers below 10."},
+        {"event_id": "e1", "pointer": "/content/text", "excerpt": "List the prime numbers below 10."},
+        {"pointer": "/evaluator/observations/1/text", "excerpt": "final_output.strip() == '[2,3,5,7]'"}
+      ]
+    }
+  ],
+  "missing_information": [
+    {
+      "item": "The full prompt or system instructions delivered to the agent, if any exist beyond /task/description and event e1, and the grader's configuration source or intent (why '[2,3,5,7]' was chosen as the expected string).",
+      "discriminates": "H1: confirms it if no format instruction existed anywhere; refutes it if an exact-format instruction was delivered but omitted from the bundle."
+    }
+  ],
+  "remediation": {
+    "status": "proposed",
+    "statement": "Targets F1. Either (a) change the grader from exact string match to a check that parses the integers present in final_output and compares the resulting set or sequence to {2, 3, 5, 7}, tolerating surrounding prose, whitespace, and separator differences, consistent with the criterion's 'formatting not specified'; or (b) if an exact output format is genuinely required, state that format explicitly in /task/description and in the success criterion so the task frame and grader agree. Not run; specification only."
+  },
+  "regression_test": {
+    "status": "proposed",
+    "targets": ["F1"],
+    "preconditions": [
+      "The revised grader for this task is available and can be invoked on an arbitrary final_output string.",
+      "The task description and success criterion still leave formatting unspecified (or, if option (b) of the remediation was taken, the task states the exact format and this test's inputs are adjusted to that format)."
+    ],
+    "inputs": [
+      "final_output = 'The primes below 10 are [2, 3, 5, 7].'",
+      "final_output = '[2,3,5,7]'",
+      "final_output = '2, 3, 5, 7'",
+      "final_output = 'The primes below 10 are [2, 3, 5, 7, 9].'",
+      "final_output = '[2, 3, 5]'"
+    ],
+    "expected_behavior": [
+      "The grader returns pass for every input whose extracted primes are exactly 2, 3, 5, 7 regardless of surrounding prose, spacing, or bracketing (the first three inputs).",
+      "The grader returns fail for inputs whose extracted numbers are not exactly 2, 3, 5, 7 (the last two inputs)."
+    ],
+    "assertions": [
+      "grade('The primes below 10 are [2, 3, 5, 7].') == pass",
+      "grade('[2,3,5,7]') == pass",
+      "grade('2, 3, 5, 7') == pass",
+      "grade('The primes below 10 are [2, 3, 5, 7, 9].') == fail",
+      "grade('[2, 3, 5]') == fail",
+      "Re-grading this bundle's recorded final_output under the revised grader yields pass, and the evaluator verdict no longer contradicts /success_criteria."
+    ]
+  }
+}

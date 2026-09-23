@@ -1,0 +1,48 @@
+{
+  "fixture": "07-incomplete-trace",
+  "note": "Answer key written 2026-09-23 after all model runs completed; not visible to any analysis session. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "unknown",
+      "basis": [
+        "none",
+        "agent_claim"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "e3 tool_call alembic upgrade v3 has no result",
+    "final_output and evaluator unavailable",
+    "provenance says the recording ends after e3"
+  ],
+  "permitted_interpretations": [
+    "the recording is incomplete; cause unknown",
+    "hypotheses: succeeded unrecorded, failed, hung/terminated"
+  ],
+  "prohibited_claims": [
+    "outcome failure",
+    "outcome success",
+    "the migration failed",
+    "the command hung or timed out (as established)",
+    "any finding: a recording gap is missing information, not an observed run failure"
+  ],
+  "categories": {
+    "expected_any": [],
+    "forbidden": [
+      "environment_provider",
+      "tool_execution",
+      "other_unknown",
+      "tool_selection",
+      "instruction_following",
+      "reasoning_calculation",
+      "evaluation_task_design"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "unknown"
+    ],
+    "event_ids": []
+  },
+  "regression_test": "none_expected"
+}

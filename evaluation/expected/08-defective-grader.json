@@ -1,0 +1,59 @@
+{
+  "fixture": "08-defective-grader",
+  "note": "Answer key written 2026-09-23 after all model runs completed; not visible to any analysis session. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "success",
+      "basis": [
+        "tool_evidence"
+      ]
+    },
+    {
+      "status": "unknown",
+      "basis": [
+        "none"
+      ]
+    },
+    {
+      "status": "failure",
+      "basis": [
+        "evaluator_observation"
+      ],
+      "only_with_category": "evaluation_task_design"
+    }
+  ],
+  "expected_observations": [
+    "e3 python printed [2, 3, 5, 7]",
+    "final_output contains [2, 3, 5, 7]",
+    "criterion says formatting not specified",
+    "evaluator o1 fail on exact match; o2 shows the rule"
+  ],
+  "permitted_interpretations": [
+    "the grader enforces a format the task never required",
+    "the agent's answer satisfies the stated criterion"
+  ],
+  "prohibited_claims": [
+    "the agent's answer was wrong",
+    "the agent violated an instruction about format",
+    "a reasoning error occurred"
+  ],
+  "categories": {
+    "expected_any": [
+      "evaluation_task_design"
+    ],
+    "forbidden": [
+      "reasoning_calculation",
+      "instruction_following",
+      "tool_selection",
+      "tool_execution",
+      "environment_provider"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "unknown"
+    ],
+    "event_ids": []
+  },
+  "regression_test": "expected"
+}

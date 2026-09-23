@@ -1,0 +1,158 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.0",
+  "run_id": "syn-07-incomplete-trace",
+  "source": {
+    "snapshot": "snapshot.json",
+    "sha256": "6de95885e1c10c2ba11c71447a209bdeb80da863948c87c45d6214905fb023c8"
+  },
+  "task": {
+    "description_ref": {"pointer": "/task/description"},
+    "criteria_status": "known",
+    "tool_policy_status": "required",
+    "evidence_coverage": {
+      "events_total": 3,
+      "events_reviewed": 3,
+      "note": "All three recorded events (e1 user message, e2 assistant message, e3 tool call c1) were reviewed. The recording ends at e3: there is no tool_result for call c1, no later assistant turn, final_output is unavailable, and the evaluator is unavailable. The provenance notes state the fixture is synthetic and that nothing after e3 was captured."
+    }
+  },
+  "outcome": {
+    "status": "unknown",
+    "basis": "none",
+    "statement": "The outcome cannot be determined. The success criterion (`alembic current` reports revision v3) requires observing the result of the migration, but the trace contains no tool result for the `alembic upgrade v3` call, no final output, and no evaluator observation. The only assistant text (e2, 'Running the migration now.') is a statement of intent before the tool call, not a claim of completion, so it cannot serve as an agent claim about the outcome.",
+    "references": [
+      {"event_id": "e3", "pointer": "/content/args/cmd", "excerpt": "alembic upgrade v3"},
+      {"pointer": "/final_output/status", "excerpt": "unavailable"},
+      {"pointer": "/evaluator/status", "excerpt": "unavailable"},
+      {"pointer": "/provenance/notes", "excerpt": "The recording ends after event e3; nothing after it was captured."}
+    ]
+  },
+  "key_events": [
+    {
+      "event_id": "e1",
+      "summary": "User asks for the database to be migrated to v3, consistent with the task description (migrate the schema to revision v3 using alembic).",
+      "references": [
+        {"event_id": "e1", "pointer": "/content/text", "excerpt": "Migrate the database to v3."},
+        {"pointer": "/task/description", "excerpt": "Migrate the application database schema to revision v3 using alembic."}
+      ]
+    },
+    {
+      "event_id": "e2",
+      "summary": "Assistant announces it is about to run the migration. This is intent, not a completion claim.",
+      "references": [
+        {"event_id": "e2", "pointer": "/content/text", "excerpt": "Running the migration now."}
+      ]
+    },
+    {
+      "event_id": "e3",
+      "summary": "Assistant issues bash call c1 running `alembic upgrade v3`. The tool is the one required by the policy and the target revision matches the task and the success criterion. No result for c1 is recorded and no events follow.",
+      "references": [
+        {"event_id": "e3", "pointer": "/content/tool", "excerpt": "bash"},
+        {"event_id": "e3", "pointer": "/content/args/cmd", "excerpt": "alembic upgrade v3"},
+        {"pointer": "/tool_policy/tools/0", "excerpt": "bash"},
+        {"pointer": "/success_criteria/criteria/0", "excerpt": "`alembic current` reports revision v3"}
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "category": "environment_provider",
+      "observation": "The recorded trace is truncated: it ends at tool_call e3 (call_id c1) with no matching tool_result, no subsequent assistant message, final_output.status is 'unavailable', and evaluator.status is 'unavailable'. The provenance notes confirm that nothing after e3 was captured.",
+      "interpretation": "The recording/harness failed to capture the remainder of the run (or the run was terminated before producing further events). This is a property of the capture environment, not of the agent's observable behavior. No agent-attributable failure is established by the events that were captured: the agent used the required tool and issued a command targeting the correct revision. Whether the migration succeeded, failed, hung, or was verified afterwards is unobservable from this bundle.",
+      "evidence_status": "established",
+      "references": [
+        {"event_id": "e3", "pointer": "/content/call_id", "excerpt": "c1"},
+        {"pointer": "/final_output/status", "excerpt": "unavailable"},
+        {"pointer": "/evaluator/status", "excerpt": "unavailable"},
+        {"pointer": "/provenance/notes", "excerpt": "The recording ends after event e3; nothing after it was captured."}
+      ]
+    }
+  ],
+  "earliest_divergence": {
+    "status": "unknown",
+    "statement": "No divergence from the expected behavior is identifiable in the captured events. e1-e3 are consistent with a correct approach: the required bash tool is used and the command `alembic upgrade v3` targets the revision named in the task and the success criterion. The trace ends before any point at which a divergence (a failed command, a missing verification step, a false completion claim) could be observed, so an earliest divergence cannot be located.",
+    "references": [
+      {"event_id": "e3", "pointer": "/content/args/cmd", "excerpt": "alembic upgrade v3"},
+      {"pointer": "/provenance/notes", "excerpt": "nothing after it was captured"}
+    ]
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "The `alembic upgrade v3` command completed successfully and the database is at revision v3, but the result was not captured.",
+      "would_confirm": "A tool_result for call c1 with exit code 0 and alembic output showing an upgrade to v3, or a post-run `alembic current` reporting v3.",
+      "would_refute": "A tool_result for c1 with a non-zero exit code or an alembic error, or `alembic current` reporting a revision other than v3.",
+      "references": [
+        {"event_id": "e3", "pointer": "/content/args/cmd", "excerpt": "alembic upgrade v3"}
+      ]
+    },
+    {
+      "id": "H2",
+      "statement": "The command failed or hung (for example, 'v3' is not a resolvable alembic revision identifier in this repository, the database was unreachable, or a migration script errored), and the run terminated without a result being recorded.",
+      "would_confirm": "A tool_result for c1 containing an alembic error (such as an unresolvable revision or a database connection error), a timeout marker, or an alembic revision map in which no revision or tag resolves to 'v3'.",
+      "would_refute": "A tool_result for c1 with exit code 0 and successful upgrade output, or an alembic revision map in which 'v3' resolves to a valid revision.",
+      "references": [
+        {"event_id": "e3", "pointer": "/content/args/cmd", "excerpt": "alembic upgrade v3"},
+        {"pointer": "/success_criteria/criteria/0", "excerpt": "`alembic current` reports revision v3"}
+      ]
+    },
+    {
+      "id": "H3",
+      "statement": "The agent ran the upgrade but never verified the resulting revision with `alembic current` and never reported completion, so even if the migration succeeded the success criterion was not demonstrated by the agent.",
+      "would_confirm": "The complete event stream shows no bash call running `alembic current` (or equivalent verification) after c1, and a final output that omits verification.",
+      "would_refute": "Later events show a call running `alembic current` with output reporting v3, or a final output that reports the verified revision.",
+      "references": [
+        {"pointer": "/success_criteria/criteria/0", "excerpt": "`alembic current` reports revision v3"},
+        {"pointer": "/provenance/notes", "excerpt": "nothing after it was captured"}
+      ]
+    },
+    {
+      "id": "H4",
+      "statement": "The truncation was caused by the recording infrastructure (harness crash, log flush failure, timeout, or user cancellation) rather than by anything the agent did.",
+      "would_confirm": "Harness or session logs showing a capture error, timeout, or cancellation at or after the timestamp of e3 (2026-09-20T10:00:03Z).",
+      "would_refute": "Harness logs showing the session ended normally with the agent's final turn, meaning the missing events were never produced rather than lost.",
+      "references": [
+        {"event_id": "e3", "pointer": "/ts", "excerpt": "2026-09-20T10:00:03Z"},
+        {"pointer": "/provenance/notes", "excerpt": "The recording ends after event e3; nothing after it was captured."}
+      ]
+    }
+  ],
+  "missing_information": [
+    {"item": "The tool_result for call c1 (exit code, stdout, stderr of `alembic upgrade v3`).", "discriminates": "H1 (success) versus H2 (failure or hang); it is the primary evidence needed to set an outcome at all."},
+    {"item": "Any events after e3 (further tool calls, assistant messages).", "discriminates": "H3 (no verification step) versus a run in which the agent ran `alembic current` and reported the result."},
+    {"item": "The agent's final output.", "discriminates": "Whether the agent claimed completion, reported an error, or produced nothing; separates an agent_claim basis from none."},
+    {"item": "An evaluator observation or an external post-run `alembic current` reading.", "discriminates": "Whether the success criterion was actually met, independent of the agent's own reporting."},
+    {"item": "The reason the recording terminated (timeout, crash, cancellation, or normal end).", "discriminates": "H4 (infrastructure loss of events that occurred) versus an agent that genuinely stalled or stopped after e3."},
+    {"item": "The repository's alembic revision map (whether 'v3' is a valid revision id, tag, or branch label).", "discriminates": "Whether `alembic upgrade v3` could have succeeded at all (H1) or must have failed with an unresolvable revision (H2)."}
+  ],
+  "remediation": {
+    "status": "proposed",
+    "statement": "On the capture side: ensure the recording harness persists each tool_result immediately after the corresponding tool_call (flush per event rather than at session end), records an explicit termination event with a reason (timeout, crash, cancel, normal) when a run ends, and attaches a reason to final_output when it is unavailable. On the analysis side: treat bundles whose last event is an unanswered tool_call as incomplete and refuse to assign an outcome. No change to agent behavior is proposed because no agent-attributable failure is established; if the complete trace later confirms H3, a separate remediation (require an `alembic current` verification step before reporting completion) would apply."
+  },
+  "regression_test": {
+    "status": "proposed",
+    "targets": ["F1"],
+    "preconditions": [
+      "A recording harness that produces afa-bundle/1 bundles for agent runs.",
+      "A sandbox with an alembic project containing a revision resolvable as v3 and a reachable database.",
+      "The harness is configured to record every tool_call and tool_result event and to write a termination marker when a run ends for any reason."
+    ],
+    "inputs": [
+      "The task 'Migrate the application database schema to revision v3 using alembic.' with the user message 'Migrate the database to v3.'",
+      "A run that proceeds at least as far as issuing a bash tool_call for `alembic upgrade v3`.",
+      "A variant run in which the harness is forcibly interrupted (timeout or kill) immediately after the tool_call is emitted."
+    ],
+    "expected_behavior": [
+      "In the normal run, the bundle contains a tool_result whose call_id matches every tool_call's call_id, a final_output that is not 'unavailable', and an evaluator observation of `alembic current`.",
+      "In the interrupted run, the bundle still records the tool_call and either the tool_result or an explicit termination event stating the reason, and final_output.status 'unavailable' is accompanied by a reason field.",
+      "A bundle that ends with an unanswered tool_call and no termination reason is rejected by bundle validation as incomplete."
+    ],
+    "assertions": [
+      "For every event with kind 'tool_call', there exists an event with kind 'tool_result' and the same call_id, or the bundle contains a termination event with a non-empty reason.",
+      "final_output.status is not 'unavailable' unless a termination reason is present.",
+      "evaluator.status is not 'unavailable' for a run that ended normally.",
+      "Validation of the fixture 07-incomplete-trace.json (as-is) reports 'incomplete trace: tool_call c1 has no tool_result and no termination reason'."
+    ]
+  }
+}

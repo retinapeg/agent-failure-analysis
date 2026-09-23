@@ -1,0 +1,45 @@
+{
+  "fixture": "05-success-no-tools",
+  "note": "Answer key written 2026-09-23 after all model runs completed; not visible to any analysis session. Not a validated benchmark.",
+  "allowed_outcomes": [
+    {
+      "status": "success",
+      "basis": [
+        "evaluator_observation",
+        "tool_evidence"
+      ]
+    }
+  ],
+  "expected_observations": [
+    "no tool calls; tool policy optional",
+    "e2 answer names mutability and is two sentences",
+    "evaluator o1 verdict pass"
+  ],
+  "permitted_interpretations": [
+    "not using the optional tool is not a failure"
+  ],
+  "prohibited_claims": [
+    "not using the python tool was a failure",
+    "the evaluator or task is defective",
+    "outcome unknown"
+  ],
+  "categories": {
+    "expected_any": [],
+    "forbidden": [
+      "tool_selection",
+      "instruction_following",
+      "other_unknown",
+      "evaluation_task_design",
+      "tool_execution",
+      "environment_provider",
+      "reasoning_calculation"
+    ]
+  },
+  "divergence": {
+    "allowed": [
+      "unknown"
+    ],
+    "event_ids": []
+  },
+  "regression_test": "none_expected"
+}

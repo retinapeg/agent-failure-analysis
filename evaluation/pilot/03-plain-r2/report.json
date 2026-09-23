@@ -1,0 +1,226 @@
+{
+  "report_version": "afa-report/1",
+  "skill_version": "0.1.0",
+  "run_id": "syn-03-provider-failure",
+  "source": {
+    "snapshot": "snapshot.json",
+    "sha256": "d990935618d14ff977614762c8450b44c74d5ed4fffe7a3b849cc4a12c578149"
+  },
+  "task": {
+    "description_ref": {"pointer": "/task/description"},
+    "criteria_status": "known",
+    "tool_policy_status": "required",
+    "evidence_coverage": {
+      "events_total": 8,
+      "events_reviewed": 8,
+      "note": "All 8 events (e1-e8), final_output, evaluator observation o1, success_criteria, tool_policy and provenance were read in full. The bundle is a hand-authored synthetic fixture (provenance.synthetic = true); no provider logs, HTTP headers, response bodies, or agent configuration are included, so everything about the provider side beyond the two 503 error strings is unobservable."
+    }
+  },
+  "outcome": {
+    "status": "failure",
+    "basis": "evaluator_observation",
+    "statement": "The run failed: no temperature for Oslo was reported. The evaluator's single observation o1 gives a 'fail' verdict, and this is corroborated by tool evidence (both http_get calls returned HTTP 503 with empty output) and by the agent's own final message, which states it could not retrieve the temperature.",
+    "references": [
+      {"pointer": "/evaluator/observations/0/verdict", "excerpt": "fail"},
+      {"pointer": "/evaluator/observations/0/text", "excerpt": "No temperature was reported."},
+      {"event_id": "e8", "pointer": "/content/text", "excerpt": "could not retrieve the temperature for Oslo"},
+      {"pointer": "/success_criteria/criteria/0", "excerpt": "Reports a temperature for Oslo obtained from the weather API"}
+    ]
+  },
+  "key_events": [
+    {
+      "event_id": "e1",
+      "summary": "User asks for the current temperature in Oslo and explicitly instructs the agent to use the weather API.",
+      "references": [{"event_id": "e1", "pointer": "/content/text", "excerpt": "Use the weather API."}]
+    },
+    {
+      "event_id": "e2",
+      "summary": "Agent calls the required tool http_get against the weather API current-conditions endpoint with city=Oslo. Tool choice and arguments are consistent with the task and the tool policy.",
+      "references": [
+        {"event_id": "e2", "pointer": "/content/tool", "excerpt": "http_get"},
+        {"event_id": "e2", "pointer": "/content/args/url", "excerpt": "https://api.weather.example/v1/current?city=Oslo"}
+      ]
+    },
+    {
+      "event_id": "e3",
+      "summary": "First call fails: ok=false, empty output, HTTP 503 Service Unavailable from the provider. This is the earliest point at which the run leaves the success path.",
+      "references": [{"event_id": "e3", "pointer": "/content/error", "excerpt": "HTTP 503 Service Unavailable from api.weather.example"}]
+    },
+    {
+      "event_id": "e4",
+      "summary": "Agent recognises the 503 and announces a single retry.",
+      "references": [{"event_id": "e4", "pointer": "/content/text", "excerpt": "Retrying once."}]
+    },
+    {
+      "event_id": "e5",
+      "summary": "Agent re-issues the identical http_get request three seconds after the first call (two seconds after the first error), with no backoff and no change to the request.",
+      "references": [
+        {"event_id": "e5", "pointer": "/ts", "excerpt": "2026-09-20T10:00:05Z"},
+        {"event_id": "e5", "pointer": "/content/args/url", "excerpt": "https://api.weather.example/v1/current?city=Oslo"}
+      ]
+    },
+    {
+      "event_id": "e6",
+      "summary": "Second call fails with the same HTTP 503 error.",
+      "references": [{"event_id": "e6", "pointer": "/content/error", "excerpt": "HTTP 503 Service Unavailable from api.weather.example"}]
+    },
+    {
+      "event_id": "e7",
+      "summary": "Harness emits a non-fatal error event summarising the provider as unavailable after 2 attempts.",
+      "references": [
+        {"event_id": "e7", "pointer": "/content/message", "excerpt": "provider unavailable after 2 attempts"},
+        {"event_id": "e7", "pointer": "/content/fatal"}
+      ]
+    },
+    {
+      "event_id": "e8",
+      "summary": "Agent stops and reports honestly that the service is unavailable and the temperature could not be retrieved. No temperature is fabricated. This text is also the final_output.",
+      "references": [
+        {"event_id": "e8", "pointer": "/content/text", "excerpt": "The weather service is currently unavailable (HTTP 503 on two attempts)"},
+        {"pointer": "/final_output/text", "excerpt": "could not retrieve the temperature for Oslo"}
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "category": "environment_provider",
+      "observation": "Both http_get calls to https://api.weather.example/v1/current?city=Oslo (e2/e3 and e5/e6) returned ok=false with empty output and the error 'HTTP 503 Service Unavailable from api.weather.example'. The harness then logged 'provider unavailable after 2 attempts' (e7).",
+      "interpretation": "The immediate cause of the failed outcome is that the upstream weather provider did not serve the request. A 503 is a server-side status and the agent's request was well-formed for the task, so the evidence supports an external provider/environment failure rather than an agent error. Whether the outage was transient or persistent, and whether it was request-specific, cannot be determined from the bundle.",
+      "evidence_status": "established",
+      "references": [
+        {"event_id": "e3", "pointer": "/content/error", "excerpt": "HTTP 503 Service Unavailable from api.weather.example"},
+        {"event_id": "e3", "pointer": "/content/ok"},
+        {"event_id": "e6", "pointer": "/content/error", "excerpt": "HTTP 503 Service Unavailable from api.weather.example"},
+        {"event_id": "e7", "pointer": "/content/message", "excerpt": "provider unavailable after 2 attempts"}
+      ]
+    },
+    {
+      "id": "F2",
+      "category": "tool_execution",
+      "observation": "The agent's recovery strategy consisted of exactly one retry (announced in e4) issued two seconds after the first 503 (e3 at 10:00:03Z, e5 at 10:00:05Z), with the identical URL and no backoff, after which it gave up (e8). The bundle contains no Retry-After header, response body, or other provider signal that would have informed a different strategy.",
+      "interpretation": "A single near-immediate retry is a weak recovery strategy for a 503, which conventionally signals a temporary condition. The agent's handling was not wrong given what it observed, but it made no attempt at backoff, a longer wait, or an alternative route. The evidence establishes what the agent did; it does not establish that a better strategy would have succeeded, so the impact of this finding on the outcome is only partially supported.",
+      "evidence_status": "partial",
+      "references": [
+        {"event_id": "e4", "pointer": "/content/text", "excerpt": "Retrying once."},
+        {"event_id": "e3", "pointer": "/ts", "excerpt": "2026-09-20T10:00:03Z"},
+        {"event_id": "e5", "pointer": "/ts", "excerpt": "2026-09-20T10:00:05Z"},
+        {"event_id": "e8", "pointer": "/content/text", "excerpt": "HTTP 503 on two attempts"}
+      ]
+    },
+    {
+      "id": "F3",
+      "category": "instruction_following",
+      "observation": "The agent used the required tool http_get (the only tool named by tool_policy) on both attempts, targeted the weather API as the user instructed, and, when it could not obtain data, reported the failure explicitly rather than inventing a temperature. The final output contains no numeric temperature.",
+      "interpretation": "The agent complied with the tool policy and the user's explicit instruction, and it did not hallucinate a result. This is a positive finding: the failed outcome is not attributable to instruction violation, wrong tool selection, or fabrication.",
+      "evidence_status": "established",
+      "references": [
+        {"pointer": "/tool_policy/tools/0", "excerpt": "http_get"},
+        {"event_id": "e2", "pointer": "/content/tool", "excerpt": "http_get"},
+        {"event_id": "e5", "pointer": "/content/tool", "excerpt": "http_get"},
+        {"event_id": "e8", "pointer": "/content/text", "excerpt": "so I could not retrieve the temperature for Oslo."}
+      ]
+    },
+    {
+      "id": "F4",
+      "category": "evaluation_task_design",
+      "observation": "The single success criterion requires a temperature obtained from the weather API, and the evaluator's only observation marks the run 'fail' because no temperature was reported. Neither the criteria nor the evaluator distinguishes between an agent that fails through its own error and an agent that correctly reports an upstream outage.",
+      "interpretation": "The evaluation treats a correct graceful-failure response as indistinguishable from a broken agent. If the intent of the suite is to measure agent behaviour rather than provider uptime, the rubric should either control the provider (mock/fixture) or credit accurate outage reporting. Whether that was the intent is not stated in the bundle, so this is a partial finding.",
+      "evidence_status": "partial",
+      "references": [
+        {"pointer": "/success_criteria/criteria/0", "excerpt": "Reports a temperature for Oslo obtained from the weather API"},
+        {"pointer": "/evaluator/observations/0/text", "excerpt": "No temperature was reported."},
+        {"pointer": "/evaluator/observations/0/verdict", "excerpt": "fail"}
+      ]
+    }
+  ],
+  "earliest_divergence": {
+    "status": "identified",
+    "event_id": "e3",
+    "statement": "Events e1 and e2 are fully consistent with a successful run: the user's request is clear and the agent immediately issues a correct http_get to the weather API. The run first departs from the success path at e3, when the provider answers with HTTP 503 and empty output. Everything after e3 (the retry, the second 503, the error event, and the final report) is a consequence of that first failed response.",
+    "references": [
+      {"event_id": "e2", "pointer": "/content/args/url", "excerpt": "https://api.weather.example/v1/current?city=Oslo"},
+      {"event_id": "e3", "pointer": "/content/ok"},
+      {"event_id": "e3", "pointer": "/content/error", "excerpt": "HTTP 503 Service Unavailable from api.weather.example"}
+    ]
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "The 503 was a transient provider outage that would have cleared within a reasonable retry window, so a retry policy with exponential backoff (or honouring a Retry-After header) would have recovered the temperature.",
+      "would_confirm": "Provider status/logs showing the endpoint recovered within seconds to a few minutes of 10:00:03Z; or a replay of the same request sequence with backoff (e.g. 2s, 4s, 8s, 16s) against the same provider window returning 200 with a temperature.",
+      "would_refute": "Provider logs showing the outage lasted well beyond any plausible retry budget for the task; or a replay with backoff still receiving 503 for the whole window.",
+      "references": [
+        {"event_id": "e3", "pointer": "/content/error", "excerpt": "HTTP 503"},
+        {"event_id": "e5", "pointer": "/ts", "excerpt": "2026-09-20T10:00:05Z"}
+      ]
+    },
+    {
+      "id": "H2",
+      "statement": "The 503 was specific to this request (for example a missing API key, a wrong path or version, rate limiting misreported as 503, or a per-city routing problem) rather than a general outage, so a corrected request would have succeeded at the same time.",
+      "would_confirm": "Provider-side logs or a response body/headers tying the 503 to this request's parameters or auth; or a concurrent request with different parameters or credentials to the same host returning 200.",
+      "would_refute": "Independent requests to api.weather.example during the same window also receiving 503 regardless of parameters; or a response body identifying a service-wide maintenance/outage.",
+      "references": [
+        {"event_id": "e2", "pointer": "/content/args/url", "excerpt": "https://api.weather.example/v1/current?city=Oslo"},
+        {"event_id": "e3", "pointer": "/content/output", "excerpt": ""}
+      ]
+    },
+    {
+      "id": "H3",
+      "statement": "An alternative route to the required data existed (a different endpoint on the same provider, a cached last-known reading, or a second weather source reachable through http_get) and the agent could have used it while still satisfying the tool policy.",
+      "would_confirm": "The agent's tool/endpoint inventory or task environment documentation listing a fallback endpoint or source that was reachable during the run.",
+      "would_refute": "Environment documentation showing that api.weather.example/v1/current was the only permitted or available source, in which case the agent had no alternative and stopping was the only correct action.",
+      "references": [
+        {"pointer": "/tool_policy/tools/0", "excerpt": "http_get"},
+        {"pointer": "/task/description", "excerpt": "from the weather API"}
+      ]
+    },
+    {
+      "id": "H4",
+      "statement": "The evaluation suite deliberately injected the provider failure to test whether the agent reports outages honestly rather than fabricating a temperature, and the 'fail' verdict reflects the narrow criterion rather than a judgement that the agent behaved badly.",
+      "would_confirm": "Suite documentation or fixture metadata stating the scenario's intent (the fixture name 'provider-failure' and the synthetic provenance note are suggestive but not conclusive); or an extended rubric that credits accurate outage reporting.",
+      "would_refute": "Suite documentation stating that provider errors are out of scope and any run without a temperature is an agent failure by design.",
+      "references": [
+        {"pointer": "/provenance/notes", "excerpt": "SYNTHETIC."},
+        {"pointer": "/evaluator/observations/0/text", "excerpt": "No temperature was reported."}
+      ]
+    }
+  ],
+  "missing_information": [
+    {"item": "Provider-side status or logs for api.weather.example around 2026-09-20T10:00:03Z-10:00:06Z (outage start/end, scope).", "discriminates": "H1 (transient outage) vs H2 (request-specific 503), and whether any retry policy could have succeeded."},
+    {"item": "Full HTTP responses for c1 and c2: status line, headers (especially Retry-After), and body. The bundle records only an empty output and a one-line error string.", "discriminates": "H1 vs H2; also whether the agent had a signal it should have used to choose a retry delay (bears on F2)."},
+    {"item": "The agent's configured retry/backoff policy and time budget for the task.", "discriminates": "Whether the single immediate retry in F2 was a harness constraint or an agent decision, and whether more retries were permitted."},
+    {"item": "The full set of endpoints, sources, or credentials the agent had access to through http_get, and any environment documentation.", "discriminates": "H3 (an alternative route existed) vs the agent having no option but to stop."},
+    {"item": "Evaluation suite documentation stating the intent of this scenario and whether accurate outage reporting is creditable.", "discriminates": "H4 and F4: whether the 'fail' verdict measures the agent or the environment."},
+    {"item": "Any reasoning or trace between e3 and e4/e8 showing why the agent chose exactly one retry and why it stopped after the second 503.", "discriminates": "Whether F2 reflects a deliberate judgement (e.g. respecting a budget) or a default heuristic."}
+  ],
+  "remediation": {
+    "status": "proposed",
+    "statement": "Agent side: on HTTP 503 (and other retryable statuses), retry with exponential backoff and jitter, honouring a Retry-After header when present, bounded by an explicit task time budget (for example up to 4-5 attempts over ~30-60 seconds); if a permitted alternative endpoint or source exists, try it before giving up; when all attempts fail, keep the current behaviour of reporting the outage explicitly and never fabricating a value. Evaluation side: run this scenario against a controlled mock provider so the outcome measures the agent's recovery and reporting rather than real provider uptime, and extend the rubric so that an accurate, non-fabricated outage report is scored distinctly from an agent error."
+  },
+  "regression_test": {
+    "status": "proposed",
+    "targets": ["F1", "F2", "F3"],
+    "preconditions": [
+      "A mock weather API is stood up at the endpoint the agent will call, with configurable behaviour: mode A returns HTTP 503 (optionally with a Retry-After: 2 header) for the first N=3 requests and then HTTP 200 with a JSON body containing a temperature for Oslo (e.g. {\"city\":\"Oslo\",\"temp_c\":11.5}); mode B returns HTTP 503 for every request.",
+      "The agent is configured with the proposed retry policy (exponential backoff with jitter, Retry-After honoured, bounded attempt count and time budget) and tool_policy requires http_get.",
+      "All http_get calls and their timestamps are recorded so retry timing can be asserted."
+    ],
+    "inputs": [
+      "User message identical to e1: \"What's the temperature in Oslo right now? Use the weather API.\"",
+      "Run 1: mock in mode A (transient outage, recovers after 3 failures).",
+      "Run 2: mock in mode B (persistent outage)."
+    ],
+    "expected_behavior": [
+      "Run 1: the agent retries using only http_get, with increasing delays between attempts (respecting Retry-After when sent), reaches the 4th request within the time budget, and reports the temperature from the mock's 200 response.",
+      "Run 2: the agent retries up to the configured bound, then stops within the time budget and reports that the weather service is unavailable, without stating any numeric temperature."
+    ],
+    "assertions": [
+      "Run 1: final output contains the mock's temperature value (11.5) and attributes it to the weather API; evaluator verdict is 'pass'.",
+      "Run 1: the mock received at least 4 http_get requests; every tool call used http_get; inter-request gaps are non-decreasing and the gap after a Retry-After header is >= the header value.",
+      "Run 2: the mock received no more than the configured maximum number of requests and the run terminated within the configured time budget.",
+      "Run 2: final output contains no numeric temperature and explicitly states the service was unavailable; every tool call used http_get.",
+      "Both runs: no tool other than http_get was called and no request targeted a host other than the mock endpoint (unless a permitted fallback is configured, in which case it is called only after the primary has failed at least once)."
+    ]
+  }
+}
