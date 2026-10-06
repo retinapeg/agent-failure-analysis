@@ -2,19 +2,19 @@
 
 Agent Failure Analysis is one installable skill folder for Claude Code and Codex-style hosts: a `SKILL.md` workflow contract, four reference documents and one dependency-free Python helper that validates the trace and checks every citation in the report. Give it a recorded agent run, the task and whatever success criteria exist. Get back an account of what happened that is tied, excerpt by excerpt, to the trace, and that separates what the evidence establishes from what is still a guess.
 
-**Result:** On ten synthetic fixtures, all 13 sessions that followed the skill produced reports that passed the deterministic checker and matched the retrospective answer keys, as first written, on outcome, categories and point of divergence (two keys were later revised; under them one report scores a category violation, see Evaluation). In a 12-run pilot on three of those fixtures, the six sessions given only the report schema produced one unsupported "established" diagnosis, three non-failures filed as findings, two references with empty excerpts and one schema error; none remained in the six final skill reports, though two skill sessions hit the empty-excerpt error on a first attempt and fixed it before a second `check-report` run, a repair loop the plain condition did not have. The exact release package passed three end-to-end cases, frozen by hash beforehand, in fresh sessions. 62 offline tests pass.
+**Result:** On ten synthetic fixtures, all 13 sessions that followed the skill produced reports that passed the deterministic checker and matched the retrospective answer keys (development labels, not ground truth), as first written, on outcome, categories and point of divergence (two keys were later revised; under them one report scores a category violation, see Evaluation). In a 12-run pilot on three of those fixtures, the six sessions given only the report schema produced one unsupported "established" diagnosis, three non-failures filed as findings, two references with empty excerpts and one schema error; none remained in the six final skill reports, though two skill sessions hit the empty-excerpt error on a first attempt and fixed it before a second `check-report` run, a repair loop the plain condition did not have. The exact release package passed three end-to-end cases, frozen by hash beforehand, in fresh sessions. 62 offline tests pass.
 
-**Why it matters:** When an agent fails, the first question is what the evidence shows, not what a model thinks probably happened. Here deterministic code verifies that every cited location and excerpt really exists in the trace; the model interprets; and the checker states in print that it does not verify the interpretation. Missing evidence stays missing, successful runs are reported as successful, and inconclusive runs are reported as unknown.
+**Why it matters:** When an agent fails, the first question is what the evidence shows, not what seems most plausible. Here deterministic code verifies that every cited location and excerpt really exists in the trace; the model interprets; and the checker states in print that it does not verify the interpretation. Missing evidence stays missing, successful runs are reported as successful, and inconclusive runs are reported as unknown.
 
 **Status:** V0.1.1 release candidate. The repository is public; no release package has been published, Codex hosts are untested, and the semantic labels in the evaluation were written by the implementing session and are marked unreviewed until a human reads the reports. Approved and deferred decisions are in `docs/decisions.md`.
 
 ## In and out
 
-**Input:** a recorded agent run as a small JSON bundle (`afa-bundle/1`), or a plain text log that `wrap-text` turns into one event per line, plus the task and any success criteria. Vendor trace formats are not parsed; convert them to the bundle first. Inputs over 5,000,000 bytes or 5,000 events are rejected outright, never analysed as a silent subset.
+**Input:** a recorded agent run as a small JSON bundle (`afa-bundle/1`), or a plain text log that `wrap-text` turns into one event per line, plus the task and any success criteria. Vendor trace formats are not parsed; convert them to the bundle first. Inputs over 5,000,000 bytes or 5,000 events (the defaults, adjustable with `--max-bytes` and `--max-events`) are rejected outright, never analysed as a silent subset.
 
 **Output:** `report.json` (rendered to `report.md`) containing:
 
-- the outcome (success, failure or unknown) and its basis (evaluator observation, tool evidence, criteria match, agent claim, or none)
+- the outcome (success, failure or unknown) and its basis (evaluator observation, tool evidence, criteria match, external verification, agent claim, or none)
 - findings, each with a taxonomy category, an observation, an interpretation, an evidence status (established, partial, contested) and references
 - the earliest evidenced divergence from a path that would have satisfied the task
 - causal hypotheses, each with what would confirm and what would refute it
@@ -65,7 +65,7 @@ Python decides whether the input is well-formed and whether every reference poin
 
 > Reference validity confirms that cited locations and excerpts exist in the snapshot. It does not confirm that any interpretation follows from them.
 
-Each of the seven failure categories has a minimum kind of reference it must cite (for example, `tool_execution` needs a tool result or error event; `environment_provider` needs a failed tool result or error). That floor is mechanical and low. It stops some fabrications, not all. The table of what each side may and may not do is in `docs/architecture.md`.
+Six of the seven failure categories have a minimum kind of reference they must cite (for example, `tool_execution` needs a tool result or error event; `environment_provider` needs a failed tool result or error); `other_unknown` accepts any reference. That floor is mechanical and low. It stops some fabrications, not all. The table of what each side may and may not do is in `docs/architecture.md`.
 
 The whole thing is one installable skill folder (`SKILL.md`, four reference documents, one Python file) for Claude Code and Codex-style hosts. The Python helper never calls a model, never touches the network, and never opens anything it finds inside a trace.
 
@@ -75,7 +75,7 @@ Recorded in `evaluation/RESULTS.md`; the numbers below are its counts.
 
 - **Deterministic tests:** 62 pytest cases, all passing.
 - **Skill behaviour, V0 build:** 19 fresh Claude Code subagent sessions across ten synthetic fixtures, running the skill from the source repository. 13 of the 19 followed the skill; all 13 reports passed the checker and matched the answer keys on outcome, categories and divergence. The keys were written afterwards by the same session that built the skill; they are development labels, not ground truth. Two keys (fixtures 02 and 10) were later revised; under the revised keys one skill report (fixture 02) would score a category violation.
-- **Exploratory pilot:** the other 6 of the 19 sessions were given only the report schema, on the same three fixtures as 6 of the skill sessions. Counts above. This does not establish that the skill beats plain prompting; it is a check that the contract and checker change behaviour on these cases.
+- **Exploratory pilot:** the other 6 of the 19 sessions were given only the report schema, on the same three fixtures as 6 of the skill sessions. Counts above. This is not a reliability estimate and does not establish that the skill beats plain prompting; it is a check that the contract and checker change behaviour on these cases.
 - **Release package:** the exact final 0.1.1 ZIP (sha256 `0b93e7c0…`) was installed in three throwaway projects and exercised end to end by fresh Claude Code sessions (`claude-opus-5-5`, Claude Code 2.1.280) on three cases whose expectations were frozen by hash beforehand. All three auto-invoked the skill, ran the packaged helper, passed the checker on the first executed run and stayed within the expectations. See `evaluation/e2e-final/RESULTS.md`.
 - **Second pass:** a concurrent validation by a different session independently reproduced the builds and check records, ran the earlier 0.1.0 ZIP on three further cases, and recorded its findings and disagreements in `evaluation/REVIEW-second-pass.md`.
 
@@ -83,7 +83,7 @@ Recorded in `evaluation/RESULTS.md`; the numbers below are its counts.
 
 - **One model family, synthetic data.** Every analysis session was a Claude model on hand-written traces. No real trace has been analysed yet, and none of this measures real-world reliability.
 - **Interpretation is the model's.** The checker guarantees citations exist and labels are allowed. It cannot tell a well-supported interpretation from a plausible-sounding one. Read the observation and its excerpts before trusting the interpretation.
-- **The taxonomy is coarse.** Seven categories, each with a minimum required reference kind.
+- **The taxonomy is coarse.** Seven categories; six have a minimum required reference kind.
 - **Hosted data handling.** The package makes no outbound requests, but the host model still processes your trace under the host's terms. Do not analyse a sensitive log in a host you would not paste it into.
 - **No adapters.** Vendor formats must be converted to the bundle by you.
 - **Proposed tests are proposals.** Nothing in a report has been executed.
